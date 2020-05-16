@@ -1,31 +1,27 @@
 <template>
-  <div class="dashboard-container">
-    <component :is="currentRole" />
+  <div class="app-container">
+    <div class="content-container">
+      <el-calendar v-model="value" />
+    </div>
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import adminDashboard from './admin'
-import editorDashboard from './editor'
 
 export default {
   name: 'Dashboard',
-  components: { adminDashboard, editorDashboard },
   data() {
     return {
-      currentRole: 'adminDashboard'
-    }
-  },
-  computed: {
-    ...mapGetters([
-      'roles'
-    ])
-  },
-  created() {
-    if (!this.roles.includes('admin')) {
-      this.currentRole = 'editorDashboard'
+      value: new Date()
     }
   }
 }
 </script>
+<style scoped>
+.app-container{
+  min-height: inherit;
+}
+.content-container{
+  background-color:#FFFFFF
+}
+</style>

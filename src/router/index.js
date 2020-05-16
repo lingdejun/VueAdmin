@@ -100,6 +100,13 @@ export const asyncRoutes = [
         name: 'Booking',
         component: () => import('@/views/booking/index'),
         meta: { title: '预约记录统计', icon: 'form' }
+      },
+      {
+        path: 'detail/:id(\\d+)',
+        component: () => import('@/views/booking/detail'),
+        name: 'BookingDetail',
+        meta: { title: '详情', noCache: true, activeMenu: '/booking/index' },
+        hidden: true
       }
     ]
   },
