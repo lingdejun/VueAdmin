@@ -4,7 +4,7 @@
       <el-form :inline="true" :model="listQuery" class="demo-form-inline">
         <el-row>
           <el-col :span="22">
-            <el-input v-model="listQuery.title" icon="el-icon-search" placeholder="前台登记搜索" class="filter-item" @keyup.enter.native="handleFilter" />
+            <el-input v-model="listQuery.title" icon="el-icon-search" placeholder="预约记录搜索" class="filter-item" @keyup.enter.native="handleFilter" />
           </el-col>
           <el-col :span="2">
             <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
@@ -13,13 +13,16 @@
           </el-col>
         </el-row>
         <el-row>
-          <el-form-item label="来访人员">
+          <el-form-item label="预约入口">
+            <el-select v-model="listQuery.enter">
+              <el-option label="区域一" value="shanghai" />
+              <el-option label="区域二" value="beijing" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="接待人">
             <el-input v-model="listQuery.receptionist" />
           </el-form-item>
-          <el-form-item label="来访单位">
-            <el-input v-model="listQuery.receptionist" />
-          </el-form-item>
-          <el-form-item label="到达日期">
+          <el-form-item label="预约日期">
             <el-date-picker
               v-model="listQuery.bookingDate"
               type="datetimerange"
@@ -28,31 +31,34 @@
               value-format="yyyy-MM-dd HH:mm:ss"
             />
           </el-form-item>
-          <el-form-item label="接待人">
-            <el-input v-model="listQuery.receptionist" />
-          </el-form-item>
-        </el-row>
-        <el-row>
           <el-form-item label="访客类型">
+            <el-select v-model="listQuery.visitorType">
+              <el-option label="区域一" value="shanghai" />
+              <el-option label="区域二" value="beijing" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="预约状态">
             <el-select v-model="listQuery.bookStatus">
               <el-option label="区域一" value="shanghai" />
               <el-option label="区域二" value="beijing" />
             </el-select>
           </el-form-item>
-          <el-form-item label="到访状态">
+        </el-row>
+        <el-row>
+          <el-form-item label="来访单位">
+            <el-input v-model="listQuery.visitorCompany" />
+          </el-form-item>
+          <el-form-item label="来访事由">
             <el-select v-model="listQuery.visitReason">
               <el-option label="区域一" value="shanghai" />
               <el-option label="区域二" value="beijing" />
             </el-select>
           </el-form-item>
-          <el-form-item label="HSSE培训有效期">
-            <el-date-picker
-              v-model="listQuery.bookingDate"
-              type="datetimerange"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              value-format="yyyy-MM-dd HH:mm:ss"
-            />
+          <el-form-item label="来访人员">
+            <el-input v-model="listQuery.visitor" />
+          </el-form-item>
+          <el-form-item label="来访车辆">
+            <el-input v-model="listQuery.visitCar" />
           </el-form-item>
         </el-row>
       </el-form>
@@ -83,44 +89,64 @@
       style="width: 100%;"
       stripe
     >
-      <el-table-column label="来访姓名" align="center">
+      <el-table-column label="预约入口" align="center">
         <template slot-scope="{row}">
           <span>{{ row.from }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="来访单位" align="center">
+      <el-table-column label="接待人" align="center">
         <template slot-scope="{row}">
           <span>{{ row.receptionist }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="到达日期" align="center">
+      <el-table-column label="预约日期" align="center">
         <template slot-scope="{row}">
           <span>{{ row.bookingDate }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="入场/离场时间" align="center">
+      <el-table-column label="预约到达/离开时间" align="center">
         <template slot-scope="{row}">
           <span>{{ row.startTime }}-{{ row.endTime }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="接待人" align="center">
+      <el-table-column label="访客类型" align="center">
         <template slot-scope="{row}">
           <span>{{ row.visitorType }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="访客类型" align="center">
+      <el-table-column label="预约状态" align="center">
         <template slot-scope="{row}">
           <el-tag :class=" row.bookStatus | statusFilter ">{{ row.bookStatus }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="HSSE培训有效期" align="center">
+      <el-table-column label="来访单位" align="center">
         <template slot-scope="{row}">
           <span>{{ row.visitorCompany }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="到访状态" align="center">
+      <el-table-column label="来访事由" align="center">
         <template slot-scope="{row}">
           <span>{{ row.visitReason }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="来访人数" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.personCount }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="来访姓名" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.visitorName }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="来访车辆数" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.carCount }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="来访车辆" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.car }}</span>
         </template>
       </el-table-column>
       <el-table-column label="预约单" align="center">
@@ -145,7 +171,7 @@ import Pagination from '@/components/Pagination' // secondary package based on e
 import listIcon from '@/icons/List_Icon_2.png'
 import lineIcon from '@/icons/Line_1.png'
 export default {
-  name: 'Foreground',
+  name: 'EmployeeManager',
   components: { Pagination },
   directives: { waves },
   filters: {

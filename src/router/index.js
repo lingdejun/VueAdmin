@@ -71,6 +71,106 @@ export const constantRoutes = [
         meta: { title: '首页', icon: 'dashboard', affix: true }
       }
     ]
+  },
+  {
+    path: '/employeemanager',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/employeemanager/index'),
+        name: 'EmployeeManager',
+        meta: { title: '员工信息管理', icon: 'example' }
+      }
+    ]
+  },
+  {
+    path: '/role',
+    component: Layout,
+    children: [
+      {
+        path: 'edit/:id(\\d+)',
+        component: () => import('@/views/role/edit'),
+        name: 'RolesEdit',
+        meta: { title: '', noCache: true, activeMenu: '/role/list' },
+        hidden: true
+      },
+      {
+        path: 'list',
+        component: () => import('@/views/role/list'),
+        name: 'Roles',
+        meta: { title: '角色管理', icon: 'list' }
+      }
+    ]
+  },
+  {
+    path: '/vistorcards',
+    component: Layout,
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/vistorcards/list'),
+        name: 'VistorCardsList',
+        meta: { title: '访客卡管理', icon: 'list' }
+      },
+      {
+        path: 'records',
+        component: () => import('@/views/vistorcards/records'),
+        name: 'VistorCardsRecords',
+        meta: { title: '使用记录', icon: 'list' },
+        hidden: true
+      },
+      {
+        path: 'create',
+        component: () => import('@/views/vistorcards/create'),
+        name: 'VistorCardsCreate',
+        meta: { title: '添加访客卡', icon: 'list' },
+        hidden: true
+      }
+    ]
+  },
+  {
+    path: '/dic',
+    component: Layout,
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/dictionary/list'),
+        name: 'Dictionary',
+        meta: { title: '字典项管理', icon: 'list' }
+      },
+      {
+        path: 'edit/:id(\\d+)',
+        component: () => import('@/views/dictionary/edit'),
+        name: 'DictionaryEdit',
+        meta: { title: '字典项编辑', icon: 'edit' },
+        hidden: true
+      }
+    ]
+  },
+  {
+    path: '/health',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/health/index'),
+        name: 'Health',
+        meta: { title: '健康收集表', icon: 'edit' }
+      }
+    ]
+  },
+  {
+    path: '/note',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/note/index'),
+        name: 'Note',
+        meta: { title: '注意事项编辑', icon: 'edit' }
+      }
+    ]
   }
 ]
 
