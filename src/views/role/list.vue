@@ -1,80 +1,11 @@
 <template>
   <div class="app-container">
-    <div class="filter-container">
-      <el-form :inline="true" :model="listQuery" class="demo-form-inline">
-        <el-row>
-          <el-col :span="22">
-            <el-input v-model="listQuery.title" icon="el-icon-search" placeholder="预约记录搜索" class="filter-item" @keyup.enter.native="handleFilter" />
-          </el-col>
-          <el-col :span="2">
-            <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
-              Search
-            </el-button>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-form-item label="预约入口">
-            <el-select v-model="listQuery.enter">
-              <el-option label="区域一" value="shanghai" />
-              <el-option label="区域二" value="beijing" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="接待人">
-            <el-input v-model="listQuery.receptionist" />
-          </el-form-item>
-          <el-form-item label="预约日期">
-            <el-date-picker
-              v-model="listQuery.bookingDate"
-              type="datetimerange"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              value-format="yyyy-MM-dd HH:mm:ss"
-            />
-          </el-form-item>
-          <el-form-item label="访客类型">
-            <el-select v-model="listQuery.visitorType">
-              <el-option label="区域一" value="shanghai" />
-              <el-option label="区域二" value="beijing" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="预约状态">
-            <el-select v-model="listQuery.bookStatus">
-              <el-option label="区域一" value="shanghai" />
-              <el-option label="区域二" value="beijing" />
-            </el-select>
-          </el-form-item>
-        </el-row>
-        <el-row>
-          <el-form-item label="来访单位">
-            <el-input v-model="listQuery.visitorCompany" />
-          </el-form-item>
-          <el-form-item label="来访事由">
-            <el-select v-model="listQuery.visitReason">
-              <el-option label="区域一" value="shanghai" />
-              <el-option label="区域二" value="beijing" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="来访人员">
-            <el-input v-model="listQuery.visitor" />
-          </el-form-item>
-          <el-form-item label="来访车辆">
-            <el-input v-model="listQuery.visitCar" />
-          </el-form-item>
-        </el-row>
-      </el-form>
-    </div>
     <div style="padding-bottom: 10px;padding-top: 10px;background-color:#FFFFFF;border:1px solid #dfe6ec;border-top-right-radius: 10px;border-top-left-radius: 10px;">
       <el-row>
-        <el-col :span="4"><img :src="lineIcon"><img :src="listIcon" style="margin-left:20px"><span style="margin-left:10px;clear: both;vertical-align: top;font-size: 25px;">结果列表</span></el-col>
+        <el-col :span="4"><img :src="lineIcon"><img :src="listIcon" style="margin-left:20px"><span style="margin-left:10px;clear: both;vertical-align: top;font-size: 25px;">角色列表</span></el-col>
         <el-col :span="8" :offset="12" style="text-align:center">
-          <el-button v-waves class="filter-item" @click="handleFilter">
-            一周
-          </el-button>
-          <el-button v-waves class="filter-item" @click="handleFilter">
-            一月
-          </el-button>
-          <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
-            导&emsp;出
+          <el-button v-waves class="filter-item" @click="addRole">
+            添加
           </el-button>
         </el-col>
       </el-row>
@@ -89,82 +20,130 @@
       style="width: 100%;"
       stripe
     >
-      <el-table-column label="预约入口" align="center">
+      <el-table-column label="角色编号" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.from }}</span>
+          <span>{{ row.Number }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="接待人" align="center">
+      <el-table-column label="角色名称" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.receptionist }}</span>
+          <span>{{ row.Name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="预约日期" align="center">
+      <el-table-column label="分配权限" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.bookingDate }}</span>
+          <el-button plain size="mini" @click="editPermission(row)">
+            分配权限
+          </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="预约到达/离开时间" align="center">
+      <el-table-column label="人员配置" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.startTime }}-{{ row.endTime }}</span>
+          <el-button plain type="info" size="mini" @click="editEmployeeSet(row)">
+            配置
+          </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="访客类型" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.visitorType }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="预约状态" align="center">
-        <template slot-scope="{row}">
-          <el-tag :class=" row.bookStatus | statusFilter ">{{ row.bookStatus }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="来访单位" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.visitorCompany }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="来访事由" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.visitReason }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="来访人数" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.personCount }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="来访姓名" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.visitorName }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="来访车辆数" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.carCount }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="来访车辆" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.car }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="预约单" align="center">
-        <template slot-scope="scope">
-          <router-link :to="'/booking/detail/'+scope.row.id">
-            <el-button>
-              详情
-            </el-button>
-          </router-link>
+      <el-table-column label="操作" align="center">
+        <template slot-scope="{row,$index}">
+          <el-button type="primary" size="mini" @click="editRole(row)">
+            编辑
+          </el-button>
+          <el-button size="mini" type="danger" @click="deleteRole(row,$index)">
+            删除
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
+      <el-form ref="dataForm" :model="roleModel" label-position="right" label-width="70px" style="width: 400px; margin-left:50px;">
+        <el-form-item label="角色名称" prop="Number">
+          <el-input v-model="roleModel.Number" />
+        </el-form-item>
+        <el-form-item label="角色编号" prop="Name">
+          <el-input v-model="roleModel.Name" />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer" style="text-align:center">
+        <el-button @click="dialogFormVisible = false">
+          取消
+        </el-button>
+        <el-button type="primary" @click="dialogStatus==='add'?save():update()">
+          保存
+        </el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog title="分配权限" :visible.sync="setPermissionFormVisible">
+      <!-- <el-tree
+        :data="permissionList"
+        show-checkbox
+        node-key="id"
+        :props="defaultProps">
+      </el-tree> -->
+      <div style="text-align:center">
+        <el-button @click="dialogFormVisible = false">
+          取消
+        </el-button>
+        <el-button type="primary" @click="permissionSetSave()">
+          保存
+        </el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog title="人员配置" :visible.sync="employeeSetFormVisible">
+      <el-form :inline="true" :model="employeeSearchModel" class="demo-form-inline">
+        <el-row>
+          <el-form-item label="员工编号">
+            <el-input v-model="employeeSearchModel.Number" />
+          </el-form-item>
+          <el-form-item label="姓名">
+            <el-input v-model="employeeSearchModel.Name" />
+          </el-form-item>
+          <el-form-item>
+            <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
+              搜索
+            </el-button>
+          </el-form-item>
+        </el-row>
+      </el-form>
+      <el-table
+        ref="multipleTable"
+        :data="empList"
+        tooltip-effect="dark"
+        style="width: 100%"
+        @selection-change="handleSelectionChange"
+      >
+        <el-table-column
+          type="selection"
+          width="55"
+        />
+        <el-table-column
+          prop="Name"
+          label="员工姓名"
+          width="120"
+        />
+        <el-table-column
+          prop="Number"
+          label="员工姓名"
+        />
+      </el-table>
+      <pagination v-show="employeeTotal>0" :total="employeeTotal" :page.sync="employeeSearchModel.PageIndex" :limit.sync="employeeSearchModel.PageSize" @pagination="getEmp" />
+      <div style="text-align:center">
+        <el-button @click="dialogFormVisible = false">
+          取消
+        </el-button>
+        <el-button type="primary" @click="employeeSetSave()">
+          保存
+        </el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { fetchList } from '@/api/article'
+import { getRoles, createRole, delRole, getRoleEmp, saveEmp } from '@/api/rolemanage'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -174,43 +153,46 @@ export default {
   name: 'Roles',
   components: { Pagination },
   directives: { waves },
-  filters: {
-    statusFilter(status) {
-      const statusMap = {
-        申请中: 'success',
-        报备中: 'info',
-        已登记: 'info',
-        已拒绝: 'danger',
-        已生效: 'info',
-        已删除: 'danger',
-        已完成: 'danger'
-      }
-      return statusMap[status]
-    }
-  },
   data() {
     return {
       listIcon: listIcon,
       lineIcon: lineIcon,
       tableKey: 0,
       list: null,
-      total: 0,
       listLoading: true,
-      listQuery: {
-        page: 1,
-        limit: 20,
-        title: '',
-        enter: '',
-        receptionist: '',
-        bookingDate: '',
-        visitorType: '',
-        bookStatus: '',
-        visitorCompany: '',
-        visitReason: '',
-        visitor: '',
-        visitCar: ''
+      downloadLoading: false,
+      dialogFormVisible: false,
+      employeeSetFormVisible: false,
+      setPermissionFormVisible: false,
+      dialogStatus: '',
+      textMap: {
+        update: '编辑角色',
+        add: '添加角色'
       },
-      downloadLoading: false
+      roleModel: {
+        Id: 0,
+        Number: '',
+        Name: ''
+      },
+      employeeTotal: 0,
+      employeeSearchModel: {
+        PageIndex: 1,
+        PageSize: 10,
+        Name: '',
+        Number: '',
+        RoleId: ''
+      },
+      multipleSelection: [],
+      empList: null,
+      permission: {
+        Number: '',
+        Name: ''
+      },
+      permissionList: null,
+      defaultProps: {
+        children: 'children',
+        label: 'label'
+      }
     }
   },
   created() {
@@ -219,9 +201,9 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      fetchList(this.listQuery).then(response => {
-        this.list = response.data.items
-        this.total = response.data.total
+      getRoles().then(response => {
+        console.log(response)
+        this.list = response.Data
 
         // Just to simulate the time of the request
         setTimeout(() => {
@@ -229,23 +211,127 @@ export default {
         }, 1.5 * 1000)
       })
     },
-    handleFilter() {
-      this.listQuery.page = 1
-      console.log(this.listQuery.bookingDate)
-      this.getList()
-    },
-    handleDownload() {
-      this.downloadLoading = true
-      import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['timestamp', 'title', 'type', 'importance', 'status']
-        const filterVal = ['timestamp', 'title', 'type', 'importance', 'status']
-        const data = this.formatJson(filterVal)
-        excel.export_json_to_excel({
-          header: tHeader,
-          data,
-          filename: 'table-list'
+    getEmp() {
+      getRoleEmp(this.employeeSearchModel).then(response => {
+        console.log(response)
+        // this.empList = response.Data.Items
+        this.employeeSearchModel.PageIndex = response.Data.PageIndex
+        this.empList = response.Data.Items
+        this.employeeTotal = response.Data.TotalReadCount
+
+        // Just to simulate the time of the request
+        setTimeout(() => {
+          this.listLoading = false
+        }, 2 * 1000)
+      }).then(() => {
+        // 设置选中状态
+        this.empList.forEach(item => {
+          if (item.Checked === 1) {
+            this.$refs.multipleTable.toggleRowSelection(item, true)
+          }
         })
-        this.downloadLoading = false
+      })
+    },
+    resetTemp() {
+      this.roleModel = {
+        Id: 0,
+        Number: '',
+        Name: ''
+      }
+    },
+    handleFilter() {
+      this.getEmp()
+    },
+    addRole() {
+      this.resetTemp()
+      this.dialogStatus = 'add'
+      this.dialogFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataForm'].clearValidate()
+      })
+    },
+    editRole(row) {
+      this.roleModel = Object.assign({}, row) // copy obj
+      this.dialogStatus = 'update'
+      this.dialogFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataForm'].clearValidate()
+      })
+    },
+    deleteRole(row, index) {
+      delRole(this.roleModel).then(() => {
+        this.list.splice(index, 1)
+        this.$notify({
+          title: 'Success',
+          message: '删除成功',
+          type: 'success',
+          duration: 2000
+        })
+      })
+    },
+    editPermission(row) {
+      this.setPermissionFormVisible = true
+    },
+    editEmployeeSet(row) {
+      this.employeeSetFormVisible = true
+      this.employeeSearchModel.RoleId = row.Id
+      this.getEmp()
+    },
+    save() {
+      this.$refs['dataForm'].validate((valid) => {
+        if (valid) {
+          createRole(this.roleModel).then(() => {
+            this.list.unshift(this.roleModel)
+            this.dialogFormVisible = false
+            this.$notify({
+              title: 'Success',
+              message: '保存成功',
+              type: 'success',
+              duration: 2000
+            })
+            this.getList()
+          })
+        }
+      })
+    },
+    update() {
+      this.$refs['dataForm'].validate((valid) => {
+        if (valid) {
+          const tempData = Object.assign({}, this.roleModel)
+          createRole(tempData).then(() => {
+            const index = this.list.findIndex(v => v.id === this.roleModel.id)
+            this.list.splice(index, 1, this.roleModel)
+            this.dialogFormVisible = false
+            this.$notify({
+              title: 'Success',
+              message: '更新成功',
+              type: 'success',
+              duration: 2000
+            })
+            this.getList()
+          })
+        }
+      })
+    },
+    permissionSetSave() {
+
+    },
+    employeeSetSave() {
+      const Ids = this.multipleSelection.map(item => {
+        return item.Id
+      })
+      const data = {
+        roleId: this.employeeSearchModel.RoleId,
+        empIds: Ids
+      }
+      saveEmp(data).then(() => {
+        this.employeeSetFormVisible = true
+        this.$notify({
+          title: 'Success',
+          message: '保存成功',
+          type: 'success',
+          duration: 2000
+        })
       })
     },
     formatJson(filterVal) {
@@ -257,9 +343,8 @@ export default {
         }
       }))
     },
-    getSortClass: function(key) {
-      const sort = this.listQuery.sort
-      return sort === `+${key}` ? 'ascending' : 'descending'
+    handleSelectionChange(val) {
+      this.multipleSelection = val
     }
   }
 }

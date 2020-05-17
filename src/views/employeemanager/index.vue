@@ -1,64 +1,54 @@
 <template>
   <div class="app-container">
-    <div class="filter-container">
+    <div>
+      <el-row>
+        <el-radio-group v-model="category" @change="categoryChange">
+          <el-radio-button label="1">赛科员工</el-radio-button>
+          <el-radio-button label="2">前台安保</el-radio-button>
+        </el-radio-group>
+      </el-row>
+    </div>
+    <div class="filter-container" style="margin-top:10px">
       <el-form :inline="true" :model="listQuery" class="demo-form-inline">
-        <el-row>
-          <el-col :span="22">
-            <el-input v-model="listQuery.title" icon="el-icon-search" placeholder="预约记录搜索" class="filter-item" @keyup.enter.native="handleFilter" />
-          </el-col>
-          <el-col :span="2">
+        <el-row v-if="category==1">
+          <el-form-item label="员工编号">
+            <el-input v-model="listQuery.Number" />
+          </el-form-item>
+          <el-form-item label="姓名">
+            <el-input v-model="listQuery.Name" />
+          </el-form-item>
+          <el-form-item label="员工邮箱">
+            <el-input v-model="listQuery.Email" />
+          </el-form-item>
+          <el-form-item label="VIP通道使用权限">
+            <el-select v-model="listQuery.Vip">
+              <el-option label="全部" value="" />
+              <el-option label="关闭" value="0" />
+              <el-option label="开启" value="1" />
+            </el-select>
+          </el-form-item>
+          <el-form-item>
             <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
-              Search
+              搜索
             </el-button>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-form-item label="预约入口">
-            <el-select v-model="listQuery.enter">
-              <el-option label="区域一" value="shanghai" />
-              <el-option label="区域二" value="beijing" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="接待人">
-            <el-input v-model="listQuery.receptionist" />
-          </el-form-item>
-          <el-form-item label="预约日期">
-            <el-date-picker
-              v-model="listQuery.bookingDate"
-              type="datetimerange"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              value-format="yyyy-MM-dd HH:mm:ss"
-            />
-          </el-form-item>
-          <el-form-item label="访客类型">
-            <el-select v-model="listQuery.visitorType">
-              <el-option label="区域一" value="shanghai" />
-              <el-option label="区域二" value="beijing" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="预约状态">
-            <el-select v-model="listQuery.bookStatus">
-              <el-option label="区域一" value="shanghai" />
-              <el-option label="区域二" value="beijing" />
-            </el-select>
           </el-form-item>
         </el-row>
-        <el-row>
-          <el-form-item label="来访单位">
-            <el-input v-model="listQuery.visitorCompany" />
+        <el-row v-if="category!=1">
+          <el-form-item label="员工编号">
+            <el-input v-model="listQuery.Number" />
           </el-form-item>
-          <el-form-item label="来访事由">
-            <el-select v-model="listQuery.visitReason">
-              <el-option label="区域一" value="shanghai" />
-              <el-option label="区域二" value="beijing" />
+          <el-form-item label="姓名">
+            <el-input v-model="listQuery.Name" />
+          </el-form-item>
+          <el-form-item label="对应门岗">
+            <el-select v-model="listQuery.Gate" clearable class="filter-item" style="width: 130px">
+              <el-option v-for="item in gateOptions" :key="item.Value" :label="item.Key" :value="item.Value" />
             </el-select>
           </el-form-item>
-          <el-form-item label="来访人员">
-            <el-input v-model="listQuery.visitor" />
-          </el-form-item>
-          <el-form-item label="来访车辆">
-            <el-input v-model="listQuery.visitCar" />
+          <el-form-item>
+            <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
+              搜索
+            </el-button>
           </el-form-item>
         </el-row>
       </el-form>
@@ -67,14 +57,14 @@
       <el-row>
         <el-col :span="4"><img :src="lineIcon"><img :src="listIcon" style="margin-left:20px"><span style="margin-left:10px;clear: both;vertical-align: top;font-size: 25px;">结果列表</span></el-col>
         <el-col :span="8" :offset="12" style="text-align:center">
-          <el-button v-waves class="filter-item" @click="handleFilter">
-            一周
+          <el-button v-waves class="filter-item" @click="addEmployee">
+            添加
           </el-button>
           <el-button v-waves class="filter-item" @click="handleFilter">
-            一月
+            下载模板
           </el-button>
           <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
-            导&emsp;出
+            上传文件
           </el-button>
         </el-col>
       </el-row>
@@ -89,82 +79,85 @@
       style="width: 100%;"
       stripe
     >
-      <el-table-column label="预约入口" align="center">
+      <el-table-column label="Id" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.from }}</span>
+          <span>{{ row.Id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="接待人" align="center">
+      <el-table-column label="员工编号" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.receptionist }}</span>
+          <span>{{ row.Number }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="预约日期" align="center">
+      <el-table-column label="姓名" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.bookingDate }}</span>
+          <span>{{ row.Name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="预约到达/离开时间" align="center">
+      <el-table-column v-if="category==1" label="邮箱" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.startTime }}-{{ row.endTime }}</span>
+          <span>{{ row.Email }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="访客类型" align="center">
+      <el-table-column v-if="category==1" label="可否使用VIP通道" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.visitorType }}</span>
+          <span v-if="row.Vip==0">关闭</span>
+          <span v-if="row.Vip==1">开启</span>
         </template>
       </el-table-column>
-      <el-table-column label="预约状态" align="center">
+      <el-table-column v-if="category!=1" label="对应门岗" align="center">
         <template slot-scope="{row}">
-          <el-tag :class=" row.bookStatus | statusFilter ">{{ row.bookStatus }}</el-tag>
+          <span>{{ row.Gate }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="来访单位" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.visitorCompany }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="来访事由" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.visitReason }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="来访人数" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.personCount }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="来访姓名" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.visitorName }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="来访车辆数" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.carCount }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="来访车辆" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.car }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="预约单" align="center">
-        <template slot-scope="scope">
-          <router-link :to="'/booking/detail/'+scope.row.id">
-            <el-button>
-              详情
-            </el-button>
-          </router-link>
+      <el-table-column label="操作" align="center">
+        <template slot-scope="{row,$index}">
+          <el-button type="primary" size="mini" @click="editEmployee(row)">
+            编辑
+          </el-button>
+          <el-button size="mini" type="danger" @click="deleteEmployee(row,$index)">
+            删除
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.PageIndex" :limit.sync="listQuery.PageSize" @pagination="getList" />
+
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
+      <el-form ref="dataForm" :model="employeeModel" label-position="right" label-width="70px" style="width: 400px; margin-left:50px;">
+        <el-form-item label="员工编号" prop="Number">
+          <el-input v-model="employeeModel.Number" />
+        </el-form-item>
+        <el-form-item label="姓名" prop="Name">
+          <el-input v-model="employeeModel.Name" />
+        </el-form-item>
+        <el-form-item label="邮箱" prop="Email">
+          <el-input v-model="employeeModel.Email" />
+        </el-form-item>
+        <el-form-item label="员工类型" prop="Category">
+          <el-radio v-model="employeeModel.Category" label="1">赛科员工</el-radio>
+          <el-radio v-model="employeeModel.Category" label="2">前台安保</el-radio>
+        </el-form-item>
+        <el-form-item label="可否使用vip通道" prop="Vip" label-width="auto">
+          <el-radio v-model="employeeModel.Vip" label="1">启用</el-radio>
+          <el-radio v-model="employeeModel.Vip" label="0">关闭</el-radio>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer" style="text-align:center">
+        <el-button @click="dialogFormVisible = false">
+          取消
+        </el-button>
+        <el-button type="primary" @click="dialogStatus==='add'?save():update()">
+          保存
+        </el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { fetchList } from '@/api/article'
+import { fetchList, createEmployee, updateEmployee, delEmployee } from '@/api/employee'
+import { fetchGateArea } from '@/api/controlevalue'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -174,20 +167,6 @@ export default {
   name: 'EmployeeManager',
   components: { Pagination },
   directives: { waves },
-  filters: {
-    statusFilter(status) {
-      const statusMap = {
-        申请中: 'success',
-        报备中: 'info',
-        已登记: 'info',
-        已拒绝: 'danger',
-        已生效: 'info',
-        已删除: 'danger',
-        已完成: 'danger'
-      }
-      return statusMap[status]
-    }
-  },
   data() {
     return {
       listIcon: listIcon,
@@ -197,31 +176,49 @@ export default {
       total: 0,
       listLoading: true,
       listQuery: {
-        page: 1,
-        limit: 20,
-        title: '',
-        enter: '',
-        receptionist: '',
-        bookingDate: '',
-        visitorType: '',
-        bookStatus: '',
-        visitorCompany: '',
-        visitReason: '',
-        visitor: '',
-        visitCar: ''
+        PageIndex: 1,
+        PageSize: 10,
+        Name: '',
+        Number: '',
+        Vip: '',
+        Gate: ''
       },
-      downloadLoading: false
+      downloadLoading: false,
+      category: 1,
+      vip: '',
+      dialogFormVisible: false,
+      dialogStatus: '',
+      textMap: {
+        update: '编辑员工',
+        add: '添加员工'
+      },
+      employeeModel: {
+        Id: '',
+        Category: 1,
+        Name: '',
+        Number: '',
+        Email: '',
+        Vip: ''
+      },
+      gateOptions: []
     }
   },
   created() {
     this.getList()
+    this.getGateArea()
   },
   methods: {
     getList() {
+      if (this.vip !== '') {
+        this.listQuery.vip = this.vip
+      }
+      this.listQuery.Category = this.category
       this.listLoading = true
       fetchList(this.listQuery).then(response => {
-        this.list = response.data.items
-        this.total = response.data.total
+        console.log(response)
+        this.listQuery.PageIndex = response.Data.PageIndex
+        this.list = response.Data.Items
+        this.total = response.Data.TotalReadCount
 
         // Just to simulate the time of the request
         setTimeout(() => {
@@ -229,9 +226,21 @@ export default {
         }, 1.5 * 1000)
       })
     },
+    getGateArea() {
+      fetchGateArea().then(response => {
+        console.log(response)
+        this.gateOptions = response.Data
+      })
+    },
+    categoryChange() {
+      this.listQuery.Name = ''
+      this.listQuery.Number = ''
+      this.listQuery.Vip = ''
+      this.listQuery.Gate = ''
+      this.getList()
+    },
     handleFilter() {
-      this.listQuery.page = 1
-      console.log(this.listQuery.bookingDate)
+      this.listQuery.PageIndex = 1
       this.getList()
     },
     handleDownload() {
@@ -248,6 +257,84 @@ export default {
         this.downloadLoading = false
       })
     },
+    resetTemp() {
+      this.employeeModel = {
+        Id: '',
+        Category: '1',
+        Name: '',
+        Number: '',
+        Email: '',
+        Vip: '0'
+      }
+    },
+    addEmployee() {
+      this.resetTemp()
+      this.dialogStatus = 'add'
+      this.dialogFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataForm'].clearValidate()
+      })
+    },
+    editEmployee(row) {
+      this.employeeModel = Object.assign({}, row) // copy obj
+      this.employeeModel.Category = this.employeeModel.Category + ''
+      this.employeeModel.Vip = this.employeeModel.Vip + ''
+      this.dialogStatus = 'update'
+      this.dialogFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataForm'].clearValidate()
+      })
+    },
+    deleteEmployee(row, index) {
+      const para = {
+        id: row.Id
+      }
+      delEmployee(para).then(() => {
+        this.list.splice(index, 1)
+        this.$notify({
+          title: 'Success',
+          message: '删除成功',
+          type: 'success',
+          duration: 2000
+        })
+      })
+    },
+    save() {
+      this.$refs['dataForm'].validate((valid) => {
+        if (valid) {
+          createEmployee(this.employeeModel).then(() => {
+            this.list.unshift(this.employeeModel)
+            this.dialogFormVisible = false
+            this.$notify({
+              title: 'Success',
+              message: '添加成功',
+              type: 'success',
+              duration: 2000
+            })
+            this.getList()
+          })
+        }
+      })
+    },
+    update() {
+      this.$refs['dataForm'].validate((valid) => {
+        if (valid) {
+          const tempData = Object.assign({}, this.employeeModel)
+          // tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
+          updateEmployee(tempData).then(() => {
+            const index = this.list.findIndex(v => v.id === this.employeeModel.id)
+            this.list.splice(index, 1, this.employeeModel)
+            this.dialogFormVisible = false
+            this.$notify({
+              title: 'Success',
+              message: 'Update Successfully',
+              type: 'success',
+              duration: 2000
+            })
+          })
+        }
+      })
+    },
     formatJson(filterVal) {
       return this.list.map(v => filterVal.map(j => {
         if (j === 'timestamp') {
@@ -256,10 +343,6 @@ export default {
           return v[j]
         }
       }))
-    },
-    getSortClass: function(key) {
-      const sort = this.listQuery.sort
-      return sort === `+${key}` ? 'ascending' : 'descending'
     }
   }
 }
