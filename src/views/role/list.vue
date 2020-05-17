@@ -75,13 +75,17 @@
       </div>
     </el-dialog>
 
-    <el-dialog title="分配权限" :visible.sync="setPermissionFormVisible">
-      <!-- <el-tree
-        :data="permissionList"
-        show-checkbox
-        node-key="id"
-        :props="defaultProps">
-      </el-tree> -->
+    <el-dialog title="分配权限" :visible.sync="setPermissionFormVisible" center>
+      <div>
+        <el-tree
+          ref="tree"
+          :data="permissionList"
+          show-checkbox
+          default-expand-all
+          node-key="Id"
+          :props="defaultProps">
+        </el-tree>
+      </div>
       <div style="text-align:center">
         <el-button @click="dialogFormVisible = false">
           取消
@@ -143,7 +147,7 @@
 </template>
 
 <script>
-import { getRoles, createRole, delRole, getRoleEmp, saveEmp } from '@/api/rolemanage'
+import { getRoles, createRole, delRole, getRoleEmp, saveEmp, getRoleMenu } from '@/api/rolemanage'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -189,10 +193,12 @@ export default {
         Name: ''
       },
       permissionList: null,
+      permissionRoleId: '',
       defaultProps: {
-        children: 'children',
-        label: 'label'
-      }
+        children: 'Children',
+        label: 'Name'
+      },
+      permissionCheckedIds: []
     }
   },
   created() {
@@ -202,7 +208,6 @@ export default {
     getList() {
       this.listLoading = true
       getRoles().then(response => {
-        console.log(response)
         this.list = response.Data
 
         // Just to simulate the time of the request
@@ -213,8 +218,6 @@ export default {
     },
     getEmp() {
       getRoleEmp(this.employeeSearchModel).then(response => {
-        console.log(response)
-        // this.empList = response.Data.Items
         this.employeeSearchModel.PageIndex = response.Data.PageIndex
         this.empList = response.Data.Items
         this.employeeTotal = response.Data.TotalReadCount
@@ -231,6 +234,34 @@ export default {
           }
         })
       })
+    },
+    getMenu(roleId) {
+      const data = {
+        id: roleId
+      }
+      getRoleMenu(data).then(response => {
+        this.permissionList = response.Data.Clients
+      }).then(() => {
+        this.permissionCheckedIds = []
+        this.$refs.tree.setCheckedKeys([])
+        this.permissionList.forEach(item => {
+          this.menuCheck(item)
+        })
+        if (this.permissionCheckedIds.length > 0) {
+          this.$refs.tree.setCheckedKeys(this.permissionCheckedIds)
+        }
+      })
+    },
+    menuCheck(item) {
+      if (item.Children.length <= 0) {
+        if (item.Checked > 0) {
+          this.permissionCheckedIds.push(item.Id)
+        }
+      } else {
+        item.Children.forEach(itemchild => {
+          this.menuCheck(itemchild)
+        })
+      }
     },
     resetTemp() {
       this.roleModel = {
@@ -271,6 +302,7 @@ export default {
     },
     editPermission(row) {
       this.setPermissionFormVisible = true
+      this.getMenu(row.Id)
     },
     editEmployeeSet(row) {
       this.employeeSetFormVisible = true
@@ -314,7 +346,7 @@ export default {
       })
     },
     permissionSetSave() {
-
+      console.log(this.$refs.tree.getCheckedKeys())
     },
     employeeSetSave() {
       const Ids = this.multipleSelection.map(item => {
