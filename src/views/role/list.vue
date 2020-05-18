@@ -83,11 +83,11 @@
           show-checkbox
           default-expand-all
           node-key="Id"
-          :props="defaultProps">
-        </el-tree>
+          :props="defaultProps"
+        />
       </div>
       <div style="text-align:center">
-        <el-button @click="dialogFormVisible = false">
+        <el-button @click="setPermissionFormVisible = false">
           取消
         </el-button>
         <el-button type="primary" @click="permissionSetSave()">
@@ -135,7 +135,7 @@
       </el-table>
       <pagination v-show="employeeTotal>0" :total="employeeTotal" :page.sync="employeeSearchModel.PageIndex" :limit.sync="employeeSearchModel.PageSize" @pagination="getEmp" />
       <div style="text-align:center">
-        <el-button @click="dialogFormVisible = false">
+        <el-button @click="employeeSetFormVisible = false">
           取消
         </el-button>
         <el-button type="primary" @click="employeeSetSave()">
@@ -147,7 +147,7 @@
 </template>
 
 <script>
-import { getRoles, createRole, delRole, getRoleEmp, saveEmp, getRoleMenu } from '@/api/rolemanage'
+import { getRoles, createRole, delRole, getRoleEmp, saveEmp, getRoleMenu, saveMenus } from '@/api/rolemanage'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -302,6 +302,7 @@ export default {
     },
     editPermission(row) {
       this.setPermissionFormVisible = true
+      this.permissionRoleId = row.Id
       this.getMenu(row.Id)
     },
     editEmployeeSet(row) {
@@ -346,6 +347,19 @@ export default {
       })
     },
     permissionSetSave() {
+      const data = {
+        roleId: this.permissionRoleId,
+        menuIds: this.$refs.tree.getCheckedKeys()
+      }
+      saveMenus(data).then(response => {
+        this.setPermissionFormVisible = false
+        this.$notify({
+          title: 'Success',
+          message: '保存成功',
+          type: 'success',
+          duration: 2000
+        })
+      })
       console.log(this.$refs.tree.getCheckedKeys())
     },
     employeeSetSave() {
@@ -357,7 +371,7 @@ export default {
         empIds: Ids
       }
       saveEmp(data).then(() => {
-        this.employeeSetFormVisible = true
+        this.employeeSetFormVisible = false
         this.$notify({
           title: 'Success',
           message: '保存成功',

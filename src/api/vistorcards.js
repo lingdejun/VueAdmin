@@ -1,0 +1,33 @@
+import request from '@/utils/request'
+
+export function getCards(data) {
+  return request({
+    url: '/card/getlist',
+    method: 'post',
+    data
+  })
+}
+
+export function obsolete(data) {
+  return request({
+    url: '/card/Obsolete',
+    method: 'post',
+    data
+  })
+}
+
+export function reset(data) {
+  return request({
+    url: '/card/reset',
+    method: 'post',
+    data
+  })
+}
+
+export function add(data) {
+  return request({
+    url: '/card/add',
+    method: 'post',
+    data
+  })
+}

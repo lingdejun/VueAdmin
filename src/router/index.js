@@ -114,10 +114,10 @@ export const constantRoutes = [
         meta: { title: '访客卡管理', icon: 'list' }
       },
       {
-        path: 'records',
+        path: 'records/:id(\\d+)',
         component: () => import('@/views/vistorcards/records'),
         name: 'VistorCardsRecords',
-        meta: { title: '使用记录', icon: 'list' },
+        meta: { title: '使用记录', icon: 'list', noCache: true, activeMenu: '/vistorcards/list' },
         hidden: true
       },
       {

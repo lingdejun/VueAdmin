@@ -3,78 +3,39 @@
     <div class="filter-container">
       <el-form :inline="true" :model="listQuery" class="demo-form-inline">
         <el-row>
-          <el-col :span="22">
-            <el-input v-model="listQuery.title" icon="el-icon-search" placeholder="预约记录搜索" class="filter-item" @keyup.enter.native="handleFilter" />
-          </el-col>
-          <el-col :span="2">
+          <el-form-item label="卡号">
+            <el-input v-model="listQuery.Number" />
+          </el-form-item>
+          <el-form-item label="序列号">
+            <el-input v-model="listQuery.SN" />
+          </el-form-item>
+          <el-form-item label="状态">
+            <el-select v-model="State">
+              <el-option label="已归还" value="0" />
+              <el-option label="使用中" value="1" />
+              <el-option label="已作废" value="-1" />
+            </el-select>
+          </el-form-item>
+          <el-form-item>
             <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
-              Search
+              搜索
             </el-button>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-form-item label="预约入口">
-            <el-select v-model="listQuery.enter">
-              <el-option label="区域一" value="shanghai" />
-              <el-option label="区域二" value="beijing" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="接待人">
-            <el-input v-model="listQuery.receptionist" />
-          </el-form-item>
-          <el-form-item label="预约日期">
-            <el-date-picker
-              v-model="listQuery.bookingDate"
-              type="datetimerange"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              value-format="yyyy-MM-dd HH:mm:ss"
-            />
-          </el-form-item>
-          <el-form-item label="访客类型">
-            <el-select v-model="listQuery.visitorType">
-              <el-option label="区域一" value="shanghai" />
-              <el-option label="区域二" value="beijing" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="预约状态">
-            <el-select v-model="listQuery.bookStatus">
-              <el-option label="区域一" value="shanghai" />
-              <el-option label="区域二" value="beijing" />
-            </el-select>
-          </el-form-item>
-        </el-row>
-        <el-row>
-          <el-form-item label="来访单位">
-            <el-input v-model="listQuery.visitorCompany" />
-          </el-form-item>
-          <el-form-item label="来访事由">
-            <el-select v-model="listQuery.visitReason">
-              <el-option label="区域一" value="shanghai" />
-              <el-option label="区域二" value="beijing" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="来访人员">
-            <el-input v-model="listQuery.visitor" />
-          </el-form-item>
-          <el-form-item label="来访车辆">
-            <el-input v-model="listQuery.visitCar" />
           </el-form-item>
         </el-row>
       </el-form>
     </div>
     <div style="padding-bottom: 10px;padding-top: 10px;background-color:#FFFFFF;border:1px solid #dfe6ec;border-top-right-radius: 10px;border-top-left-radius: 10px;">
       <el-row>
-        <el-col :span="4"><img :src="lineIcon"><img :src="listIcon" style="margin-left:20px"><span style="margin-left:10px;clear: both;vertical-align: top;font-size: 25px;">结果列表</span></el-col>
-        <el-col :span="8" :offset="12" style="text-align:center">
+        <el-col :span="4"><img :src="lineIcon"><img :src="listIcon" style="margin-left:20px;height:20px"><span style="margin-left:10px;clear: both;vertical-align: super;font-size: 18px;">访客卡列表</span></el-col>
+        <el-col :span="20" style="text-align:right;padding-right:10px">
           <el-button v-waves class="filter-item" @click="handleFilter">
-            一周
-          </el-button>
-          <el-button v-waves class="filter-item" @click="handleFilter">
-            一月
+            批量导入
           </el-button>
           <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
-            导&emsp;出
+            下载模板
+          </el-button>
+          <el-button v-waves class="filter-item" @click="addCard">
+            添加
           </el-button>
         </el-col>
       </el-row>
@@ -89,82 +50,63 @@
       style="width: 100%;"
       stripe
     >
-      <el-table-column label="预约入口" align="center">
+      <el-table-column label="卡号" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.from }}</span>
+          <span>{{ row.Number }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="接待人" align="center">
+      <el-table-column label="序列号" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.receptionist }}</span>
+          <span>{{ row.SN }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="预约日期" align="center">
+      <el-table-column label="状态" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.bookingDate }}</span>
+          <span>{{ row.State+'' | stateFilter }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="预约到达/离开时间" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.startTime }}-{{ row.endTime }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="访客类型" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.visitorType }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="预约状态" align="center">
-        <template slot-scope="{row}">
-          <el-tag :class=" row.bookStatus | statusFilter ">{{ row.bookStatus }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="来访单位" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.visitorCompany }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="来访事由" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.visitReason }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="来访人数" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.personCount }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="来访姓名" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.visitorName }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="来访车辆数" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.carCount }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="来访车辆" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.car }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="预约单" align="center">
+      <el-table-column min-width="150px" label="操作" align="center">
         <template slot-scope="scope">
-          <router-link :to="'/booking/detail/'+scope.row.id">
+          <router-link :to="'/vistorcards/records/'+scope.row.Id">
             <el-button>
-              详情
+              使用记录
             </el-button>
           </router-link>
+          <el-button :disabled="scope.row.State==-1" @click="obsoleteCard(scope.row.Id)">
+            作废
+          </el-button>
+          <el-button :disabled="scope.row.State===0 || scope.row.State==-1" @click="restCard(scope.row.Id)">
+            重置状态
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.PageIndex" :limit.sync="listQuery.PageSize" @pagination="getList" />
+
+    <el-dialog title="添加卡片" :visible.sync="dialogFormVisible">
+      <el-form ref="dataForm" :model="cardModel" label-position="right" label-width="70px" style="width: 400px; margin-left:50px;">
+        <el-form-item label="卡号" prop="Number">
+          <el-input v-model="cardModel.Number" />
+        </el-form-item>
+        <el-form-item label="序列号" prop="SN">
+          <el-input v-model="cardModel.SN" />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer" style="text-align:center">
+        <el-button @click="dialogFormVisible = false">
+          取消
+        </el-button>
+        <el-button type="primary" @click="save">
+          保存
+        </el-button>
+      </div>
+    </el-dialog>
+
   </div>
 </template>
 
 <script>
-import { fetchList } from '@/api/article'
+import { getCards, obsolete, reset, add } from '@/api/vistorcards'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -175,17 +117,14 @@ export default {
   components: { Pagination },
   directives: { waves },
   filters: {
-    statusFilter(status) {
-      const statusMap = {
-        申请中: 'success',
-        报备中: 'info',
-        已登记: 'info',
-        已拒绝: 'danger',
-        已生效: 'info',
-        已删除: 'danger',
-        已完成: 'danger'
+    stateFilter(state) {
+      const stateMap = {
+        '0': '已归还',
+        '1': '使用中',
+        '-1': '已作废',
+        '-9': '异常'
       }
-      return statusMap[status]
+      return stateMap[state]
     }
   },
   data() {
@@ -196,21 +135,19 @@ export default {
       list: null,
       total: 0,
       listLoading: true,
+      State: '',
       listQuery: {
-        page: 1,
-        limit: 20,
-        title: '',
-        enter: '',
-        receptionist: '',
-        bookingDate: '',
-        visitorType: '',
-        bookStatus: '',
-        visitorCompany: '',
-        visitReason: '',
-        visitor: '',
-        visitCar: ''
+        PageIndex: 1,
+        PageSize: 10,
+        SN: '',
+        Number: ''
       },
-      downloadLoading: false
+      downloadLoading: false,
+      dialogFormVisible: false,
+      cardModel: {
+        Number: '',
+        SN: ''
+      }
     }
   },
   created() {
@@ -218,10 +155,14 @@ export default {
   },
   methods: {
     getList() {
+      if (this.State !== '') {
+        this.listQuery.State = this.State
+      }
       this.listLoading = true
-      fetchList(this.listQuery).then(response => {
-        this.list = response.data.items
-        this.total = response.data.total
+      getCards(this.listQuery).then(response => {
+        this.listQuery.PageIndex = response.Data.PageIndex
+        this.list = response.Data.Items
+        this.total = response.Data.TotalReadCount
 
         // Just to simulate the time of the request
         setTimeout(() => {
@@ -230,8 +171,7 @@ export default {
       })
     },
     handleFilter() {
-      this.listQuery.page = 1
-      console.log(this.listQuery.bookingDate)
+      this.listQuery.PageIndex = 1
       this.getList()
     },
     handleDownload() {
@@ -248,6 +188,53 @@ export default {
         this.downloadLoading = false
       })
     },
+    addCard() {
+      this.dialogFormVisible = true
+      this.cardModel = {
+        Number: '',
+        SN: ''
+      }
+      console.log('add card')
+    },
+    obsoleteCard(Id) {
+      const data = {
+        id: Id
+      }
+      obsolete(data).then(response => {
+        this.$notify({
+          title: 'Success',
+          message: '保存成功',
+          type: 'success',
+          duration: 2000
+        })
+        this.getList()
+      })
+    },
+    restCard(Id) {
+      const data = {
+        id: Id
+      }
+      reset(data).then(response => {
+        this.$notify({
+          title: 'Success',
+          message: '保存成功',
+          type: 'success',
+          duration: 2000
+        })
+        this.getList()
+      })
+    },
+    save() {
+      add(this.cardModel).then(response => {
+        this.$notify({
+          title: 'Success',
+          message: '保存成功',
+          type: 'success',
+          duration: 2000
+        })
+        this.getList()
+      })
+    },
     formatJson(filterVal) {
       return this.list.map(v => filterVal.map(j => {
         if (j === 'timestamp') {
@@ -256,10 +243,6 @@ export default {
           return v[j]
         }
       }))
-    },
-    getSortClass: function(key) {
-      const sort = this.listQuery.sort
-      return sort === `+${key}` ? 'ascending' : 'descending'
     }
   }
 }

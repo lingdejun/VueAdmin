@@ -46,3 +46,11 @@ export function getRoleMenu(data) {
   })
 }
 
+export function saveMenus(data) {
+  return request({
+    url: '/role/savemenu',
+    method: 'post',
+    data
+  })
+}
+
