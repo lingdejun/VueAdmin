@@ -28,7 +28,7 @@
           </el-form-item>
           <el-form-item label="归还时间">
             <el-date-picker
-              v-model="LteReturnDateTime"
+              v-model="ReturnDateTime"
               type="datetimerange"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
@@ -45,16 +45,10 @@
     </div>
     <div style="padding-bottom: 10px;padding-top: 10px;background-color:#FFFFFF;border:1px solid #dfe6ec;border-top-right-radius: 10px;border-top-left-radius: 10px;">
       <el-row>
-        <el-col :span="4"><img :src="lineIcon"><img :src="listIcon" style="margin-left:20px;height:20px"><span style="margin-left:10px;clear: both;vertical-align: super;font-size: 18px;">访客卡列表</span></el-col>
-        <el-col :span="20" style="text-align:right;padding-right:10px">
+        <el-col :span="6"><img :src="lineIcon"><img :src="listIcon" style="margin-left:20px;height:20px"><span style="margin-left:10px;clear: both;vertical-align: super;font-size: 18px;">使用记录</span></el-col>
+        <el-col :span="18" style="text-align:right;padding-right:10px">
           <el-button v-waves class="filter-item" @click="handleFilter">
-            批量导入
-          </el-button>
-          <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
-            下载模板
-          </el-button>
-          <el-button v-waves class="filter-item" @click="addCard">
-            添加
+            导出
           </el-button>
         </el-col>
       </el-row>
@@ -69,63 +63,44 @@
       style="width: 100%;"
       stripe
     >
-      <el-table-column label="卡号" align="center">
+      <el-table-column label="使用人" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.Number }}</span>
+          <span>{{ row.UserName }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="序列号" align="center">
+      <el-table-column label="联系电话" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.SN }}</span>
+          <span>{{ row.Mobile }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="状态" align="center">
+      <el-table-column label="领取时间" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.State+'' | stateFilter }}</span>
+          <span>{{ row.TakeTime }}</span>
         </template>
       </el-table-column>
-      <el-table-column min-width="150px" label="操作" align="center">
-        <template slot-scope="scope">
-          <router-link :to="'/vistorcards/records/'+scope.row.Id">
-            <el-button>
-              使用记录
-            </el-button>
-          </router-link>
-          <el-button :disabled="scope.row.State==-1" @click="obsoleteCard(scope.row.Id)">
-            作废
-          </el-button>
-          <el-button :disabled="scope.row.State===0 || scope.row.State==-1" @click="restCard(scope.row.Id)">
-            重置状态
-          </el-button>
+      <el-table-column label="归还时间" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.ReturnTime }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="接待人" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.ReceiverName }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="接待人邮箱" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.ReceiverEmail }}</span>
         </template>
       </el-table-column>
     </el-table>
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.PageIndex" :limit.sync="listQuery.PageSize" @pagination="getList" />
 
-    <el-dialog title="添加卡片" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :model="cardModel" label-position="right" label-width="70px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="卡号" prop="Number">
-          <el-input v-model="cardModel.Number" />
-        </el-form-item>
-        <el-form-item label="序列号" prop="SN">
-          <el-input v-model="cardModel.SN" />
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer" style="text-align:center">
-        <el-button @click="dialogFormVisible = false">
-          取消
-        </el-button>
-        <el-button type="primary" @click="save">
-          保存
-        </el-button>
-      </div>
-    </el-dialog>
-
   </div>
 </template>
 
 <script>
-import { getCards } from '@/api/vistorcards'
+import { getRecords } from '@/api/vistorcards'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 import listIcon from '@/icons/List_Icon_2.png'
@@ -134,17 +109,6 @@ export default {
   name: 'VistorCardsRecords',
   components: { Pagination },
   directives: { waves },
-  filters: {
-    stateFilter(state) {
-      const stateMap = {
-        '0': '已归还',
-        '1': '使用中',
-        '-1': '已作废',
-        '-9': '异常'
-      }
-      return stateMap[state]
-    }
-  },
   data() {
     return {
       listIcon: listIcon,
@@ -153,15 +117,20 @@ export default {
       list: null,
       total: 0,
       listLoading: true,
-      State: '',
       listQuery: {
         PageIndex: 1,
         PageSize: 10,
         UserName: '',
         Mobile: '',
         ReceiverName: '',
-        ReceiverEmail: ''
+        ReceiverEmail: '',
+        GteTakeTime: '',
+        LteTakeTime: '',
+        GteReturnTime: '',
+        LteReturnTime: ''
       },
+      GetDateTime: null,
+      ReturnDateTime: null,
       downloadLoading: false
     }
   },
@@ -172,8 +141,22 @@ export default {
   },
   methods: {
     getList() {
+      if (this.GetDateTime != null && this.GetDateTime.length > 0) {
+        this.listQuery.GteTakeTime = this.GetDateTime[0]
+        this.listQuery.LteTakeTime = this.GetDateTime[1]
+      } else {
+        this.listQuery.GteTakeTime = ''
+        this.listQuery.LteTakeTime = ''
+      }
+      if (this.ReturnDateTime != null && this.ReturnDateTime.length > 0) {
+        this.listQuery.GteReturnTime = this.GetDateTime[0]
+        this.listQuery.LteReturnTime = this.GetDateTime[1]
+      } else {
+        this.listQuery.GteReturnTime = ''
+        this.listQuery.LteReturnTime = ''
+      }
       this.listLoading = true
-      getCards(this.listQuery).then(response => {
+      getRecords(this.listQuery).then(response => {
         this.listQuery.PageIndex = response.Data.PageIndex
         this.list = response.Data.Items
         this.total = response.Data.TotalReadCount

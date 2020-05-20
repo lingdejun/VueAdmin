@@ -31,3 +31,11 @@ export function add(data) {
     data
   })
 }
+
+export function getRecords(data) {
+  return request({
+    url: '/card/GetHistoryList',
+    method: 'post',
+    data
+  })
+}

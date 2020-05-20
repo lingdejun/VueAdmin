@@ -140,10 +140,10 @@ export const constantRoutes = [
         meta: { title: '字典项管理', icon: 'list' }
       },
       {
-        path: 'edit/:id(\\d+)',
+        path: 'edit/:id(\\d+)/:title',
         component: () => import('@/views/dictionary/edit'),
         name: 'DictionaryEdit',
-        meta: { title: '字典项编辑', icon: 'edit' },
+        meta: { title: '字典项编辑', icon: 'edit', noCache: true, activeMenu: '/dic/list' },
         hidden: true
       }
     ]
@@ -169,6 +169,18 @@ export const constantRoutes = [
         component: () => import('@/views/note/index'),
         name: 'Note',
         meta: { title: '注意事项编辑', icon: 'edit' }
+      }
+    ]
+  },
+  {
+    path: '/train',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/train/index'),
+        name: 'Train',
+        meta: { title: '培训设置', icon: 'edit' }
       }
     ]
   }
