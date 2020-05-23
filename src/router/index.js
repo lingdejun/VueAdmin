@@ -181,6 +181,13 @@ export const constantRoutes = [
         component: () => import('@/views/train/index'),
         name: 'Train',
         meta: { title: '培训设置', icon: 'edit' }
+      },
+      {
+        path: 'edit/:id(\\d+)',
+        component: () => import('@/views/train/edit'),
+        name: 'TrainEdit',
+        meta: { title: '培训编辑', icon: 'edit', noCache: true, activeMenu: '/train/index' },
+        hidden: true
       }
     ]
   }

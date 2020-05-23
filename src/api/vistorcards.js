@@ -39,3 +39,11 @@ export function getRecords(data) {
     data
   })
 }
+
+export function downloadTemplate(data) {
+  return request({
+    url: '/card/download',
+    method: 'post',
+    data
+  })
+}

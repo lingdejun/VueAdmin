@@ -106,7 +106,7 @@
 </template>
 
 <script>
-import { getCards, obsolete, reset, add } from '@/api/vistorcards'
+import { getCards, obsolete, reset, add, downloadTemplate } from '@/api/vistorcards'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -176,16 +176,17 @@ export default {
     },
     handleDownload() {
       this.downloadLoading = true
-      import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['timestamp', 'title', 'type', 'importance', 'status']
-        const filterVal = ['timestamp', 'title', 'type', 'importance', 'status']
-        const data = this.formatJson(filterVal)
-        excel.export_json_to_excel({
-          header: tHeader,
-          data,
-          filename: 'table-list'
-        })
-        this.downloadLoading = false
+      downloadTemplate({}).then(response => {
+        if (response.Result === 1) {
+          var blob = this.dataURLtoBlob(response.Data.Base64Str, response.Data.Type)
+          var downloadUrl = window.URL.createObjectURL(blob)
+          var anchor = document.createElement('a')
+          anchor.href = downloadUrl
+          anchor.download = response.Data.FileName
+          anchor.click()
+          this.downloadLoading = false
+          window.URL.revokeObjectURL(blob)
+        }
       })
     },
     addCard() {
@@ -243,6 +244,15 @@ export default {
           return v[j]
         }
       }))
+    },
+    dataURLtoBlob(base64Str, type) {
+      const bstr = atob(base64Str)
+      let n = bstr.length
+      const u8arr = new Uint8Array(n)
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n)
+      }
+      return new Blob([u8arr], { type: type })
     }
   }
 }

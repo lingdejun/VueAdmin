@@ -35,3 +35,10 @@ export function delEmployee(data) {
   })
 }
 
+export function downloadTemplate(data) {
+  return request({
+    url: '/emp/download',
+    method: 'post',
+    data
+  })
+}

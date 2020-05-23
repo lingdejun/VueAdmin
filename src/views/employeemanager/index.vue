@@ -60,10 +60,10 @@
           <el-button v-waves class="filter-item" @click="addEmployee">
             添加
           </el-button>
-          <el-button v-waves class="filter-item" @click="handleFilter">
+          <el-button v-waves class="filter-item" @click="download">
             下载模板
           </el-button>
-          <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
+          <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download">
             上传文件
           </el-button>
         </el-col>
@@ -156,10 +156,9 @@
 </template>
 
 <script>
-import { fetchList, createEmployee, updateEmployee, delEmployee } from '@/api/employee'
+import { fetchList, createEmployee, updateEmployee, delEmployee, downloadTemplate } from '@/api/employee'
 import { fetchGateArea } from '@/api/controlevalue'
 import waves from '@/directive/waves' // waves directive
-import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 import listIcon from '@/icons/List_Icon_2.png'
 import lineIcon from '@/icons/Line_1.png'
@@ -243,20 +242,6 @@ export default {
       this.listQuery.PageIndex = 1
       this.getList()
     },
-    handleDownload() {
-      this.downloadLoading = true
-      import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['timestamp', 'title', 'type', 'importance', 'status']
-        const filterVal = ['timestamp', 'title', 'type', 'importance', 'status']
-        const data = this.formatJson(filterVal)
-        excel.export_json_to_excel({
-          header: tHeader,
-          data,
-          filename: 'table-list'
-        })
-        this.downloadLoading = false
-      })
-    },
     resetTemp() {
       this.employeeModel = {
         Id: '',
@@ -335,14 +320,29 @@ export default {
         }
       })
     },
-    formatJson(filterVal) {
-      return this.list.map(v => filterVal.map(j => {
-        if (j === 'timestamp') {
-          return parseTime(v[j])
-        } else {
-          return v[j]
+    download() {
+      this.downloadLoading = true
+      downloadTemplate({}).then(response => {
+        if (response.Result === 1) {
+          var blob = this.dataURLtoBlob(response.Data.Base64Str, response.Data.Type)
+          var downloadUrl = window.URL.createObjectURL(blob)
+          var anchor = document.createElement('a')
+          anchor.href = downloadUrl
+          anchor.download = response.Data.FileName
+          anchor.click()
+          this.downloadLoading = false
+          window.URL.revokeObjectURL(blob)
         }
-      }))
+      })
+    },
+    dataURLtoBlob(base64Str, type) {
+      const bstr = atob(base64Str)
+      let n = bstr.length
+      const u8arr = new Uint8Array(n)
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n)
+      }
+      return new Blob([u8arr], { type: type })
     }
   }
 }
