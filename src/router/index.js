@@ -221,10 +221,10 @@ export const asyncRoutes = [
         meta: { title: '预约记录统计', icon: 'form' }
       },
       {
-        path: 'detail/:id(\\d+)',
+        path: 'detail/:id(\\d+)/:category(\\d+)',
         component: () => import('@/views/booking/detail'),
         name: 'BookingDetail',
-        meta: { title: '详情', noCache: true, activeMenu: '/booking/index' },
+        meta: { title: '预约单详情', noCache: true, activeMenu: '/booking/index' },
         hidden: true
       }
     ]

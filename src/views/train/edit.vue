@@ -35,6 +35,7 @@
           <el-upload
             class="upload-demo"
             drag
+            :headers="uploadHeaders"
             :action="fileUrl"
             :multiple="false"
             :on-success="uploadSuccess"
@@ -66,6 +67,9 @@ export default {
   },
   data() {
     return {
+      ploadHeaders: {
+        'LoginId': '123'
+      },
       title: '',
       trainCategory: '1',
       fileUrl: 'http://test6.topbpm.com/visitbgapi/train/upload',

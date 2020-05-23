@@ -47,3 +47,11 @@ export function downloadTemplate(data) {
     data
   })
 }
+
+export function downloadRecord(data) {
+  return request({
+    url: '/card/ExportHistoryList',
+    method: 'post',
+    data
+  })
+}

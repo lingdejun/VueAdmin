@@ -47,7 +47,7 @@
       <el-row>
         <el-col :span="6"><img :src="lineIcon"><img :src="listIcon" style="margin-left:20px;height:20px"><span style="margin-left:10px;clear: both;vertical-align: super;font-size: 18px;">使用记录</span></el-col>
         <el-col :span="18" style="text-align:right;padding-right:10px">
-          <el-button v-waves class="filter-item" @click="handleFilter">
+          <el-button v-waves class="filter-item" @click="handleDownload">
             导出
           </el-button>
         </el-col>
@@ -100,7 +100,7 @@
 </template>
 
 <script>
-import { getRecords } from '@/api/vistorcards'
+import { getRecords, downloadRecord } from '@/api/vistorcards'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 import listIcon from '@/icons/List_Icon_2.png'
@@ -170,6 +170,30 @@ export default {
     handleFilter() {
       this.listQuery.PageIndex = 1
       this.getList()
+    },
+    handleDownload() {
+      this.downloadLoading = true
+      downloadRecord(this.listQuery).then(response => {
+        if (response.Result === 1) {
+          var blob = this.dataURLtoBlob(response.Data.Base64Str, response.Data.Type)
+          var downloadUrl = window.URL.createObjectURL(blob)
+          var anchor = document.createElement('a')
+          anchor.href = downloadUrl
+          anchor.download = response.Data.FileName
+          anchor.click()
+          this.downloadLoading = false
+          window.URL.revokeObjectURL(blob)
+        }
+      })
+    },
+    dataURLtoBlob(base64Str, type) {
+      const bstr = atob(base64Str)
+      let n = bstr.length
+      const u8arr = new Uint8Array(n)
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n)
+      }
+      return new Blob([u8arr], { type: type })
     }
   }
 }

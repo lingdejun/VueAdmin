@@ -55,17 +55,23 @@
     </div>
     <div style="padding-bottom: 10px;padding-top: 10px;background-color:#FFFFFF;border:1px solid #dfe6ec;border-top-right-radius: 10px;border-top-left-radius: 10px;">
       <el-row>
-        <el-col :span="4"><img :src="lineIcon"><img :src="listIcon" style="margin-left:20px"><span style="margin-left:10px;clear: both;vertical-align: top;font-size: 25px;">结果列表</span></el-col>
-        <el-col :span="8" :offset="12" style="text-align:center">
+        <el-col :span="6"><img :src="lineIcon"><img :src="listIcon" style="margin-left:20px;height:20px"><span style="margin-left:10px;clear: both;vertical-align: super;font-size: 18px;">结果列表</span></el-col>
+        <el-col :span="18" style="text-align:right;padding-right:10px">
           <el-button v-waves class="filter-item" @click="addEmployee">
             添加
           </el-button>
           <el-button v-waves class="filter-item" @click="download">
             下载模板
           </el-button>
-          <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download">
-            上传文件
-          </el-button>
+          <el-upload
+            class="upload-demo"
+            :headers="uploadHeaders"
+            :action="fileUrl"
+            :on-success="fileSuccess"
+            :multiple="false"
+          >
+            <el-button size="small" type="primary">上传文件</el-button>
+          </el-upload>
         </el-col>
       </el-row>
     </div>
@@ -168,6 +174,10 @@ export default {
   directives: { waves },
   data() {
     return {
+      uploadHeaders: {
+        'LoginId': '123'
+      },
+      fileUrl: 'http://test6.topbpm.com/visitbgapi/emp/import',
       listIcon: listIcon,
       lineIcon: lineIcon,
       tableKey: 0,
@@ -343,6 +353,15 @@ export default {
         u8arr[n] = bstr.charCodeAt(n)
       }
       return new Blob([u8arr], { type: type })
+    },
+    fileSuccess(response, file, fileList) {
+      let html = '<div><span>新增：' + response.Added + '</span></div>'
+      html += '<div><span>删除：' + response.Deleted + '</span></div>'
+      html += '<div><span>信息变更：' + response.Updated + '</span></div>'
+      html += '<div><span>消息：' + response.Info + '</span></div>'
+      this.$alert(html, '导入结果', {
+        dangerouslyUseHTMLString: true
+      })
     }
   }
 }
