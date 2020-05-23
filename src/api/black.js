@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function fetchList(data) {
   return request({
-    url: '/stat/getappointmentstat',
+    url: '/blacklist/getlist',
     method: 'post',
     data
   })
@@ -10,31 +10,39 @@ export function fetchList(data) {
 
 export function getDetail(data) {
   return request({
-    url: '/appointment/getdetail',
+    url: '/blacklist/get',
     method: 'post',
     data
   })
 }
 
-export function getVipDetail(data) {
+export function saveBlack(data) {
   return request({
-    url: '/appointment/getvipdetail',
+    url: '/blacklist/save',
     method: 'post',
     data
   })
 }
 
-export function exportdata(data) {
+export function delBlack(data) {
   return request({
-    url: '/stat/exportappointmentstat',
+    url: '/blacklist/delete',
     method: 'post',
     data
   })
 }
 
-export function manualProcessing(data) {
+export function exportBlack(data) {
   return request({
-    url: '/card/manualhandling',
+    url: '/blacklist/export',
+    method: 'post',
+    data
+  })
+}
+
+export function downloadBlack(data) {
+  return request({
+    url: '/blacklist/download',
     method: 'post',
     data
   })

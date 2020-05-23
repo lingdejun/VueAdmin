@@ -15,3 +15,11 @@ export function fetchVistorReason(data) {
     data
   })
 }
+
+export function fetchIdType(data) {
+  return request({
+    url: '/controldata/getidtype',
+    method: 'post',
+    data
+  })
+}

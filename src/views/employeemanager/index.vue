@@ -64,7 +64,7 @@
             下载模板
           </el-button>
           <el-upload
-            class="upload-demo"
+            class="upload-demo inline-block"
             :headers="uploadHeaders"
             :action="fileUrl"
             :on-success="fileSuccess"
@@ -381,5 +381,9 @@ export default {
 .danger{
   background-color:rgba(236, 174, 79, 0.849);
   color:#f3f6fa;
+}
+
+.inline-block{
+  display: inline-block;
 }
 </style>

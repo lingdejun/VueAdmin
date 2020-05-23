@@ -273,17 +273,21 @@
                   <el-col :span="12" class="text-left">
                     <div>
                       <el-row type="flex" class="item-row">
-                        <el-col :span="24">{{ cell.LeaveTime }}</el-col>
+                        <el-col :span="24">
+                          <span>{{ cell.LeaveTime }}</span>
+                          <el-button v-if=" category==='2' && cell.ManualHandling===1" type="danger" @click="manualHandlingandl(cell.CardId)">手动办理</el-button>
+                        </el-col>
                       </el-row>
                     </div>
                   </el-col>
                 </el-row>
-                <el-row type="flex" style="background-color: #FFFFFF;border-bottom-left-radius: 15px;border-bottom-right-radius: 15px;" class="item-row">
+                <el-row v-if="category==='1'" type="flex" style="background-color: #FFFFFF;border-bottom-left-radius: 15px;border-bottom-right-radius: 15px;" class="item-row">
                   <el-col :span="12" class="text-right">
                     <label>姓名:</label>
                   </el-col>
                   <el-col :span="12" class="text-left">
-                    {{ cell.Name }}
+                    <span>{{ cell.Name }}</span>
+                    <el-button v-if="cell.ManualHandling===1" type="danger" @click="manualHandlingandl(cell.CardId)">手动办理</el-button>
                   </el-col>
                 </el-row>
               </div>
@@ -296,7 +300,7 @@
 </template>
 
 <script>
-import { getDetail, getVipDetail } from '@/api/booking'
+import { getDetail, getVipDetail, manualProcessing } from '@/api/booking'
 import lineIcon from '@/icons/Line_1.png'
 import editIcon from '@/icons/bookingdetail/Edit_1.png'
 import carIcon from '@/icons/bookingdetail/Fill_1.png'
@@ -421,6 +425,28 @@ export default {
     setPageTitle() {
       const title = this.category === '1' ? '预约单详情' : 'Vip预约单详情'
       document.title = `${title} - ${this.appointmentInfo.Id}`
+    },
+    manualHandlingandl(cardId) {
+      const data = {
+        id: cardId
+      }
+      manualProcessing(data).then(response => {
+        if (response.Result === 1) {
+          this.$notify({
+            title: 'Success',
+            message: '手动处理成功',
+            type: 'success',
+            duration: 2000
+          })
+        } else {
+          this.$notify({
+            title: 'Fail',
+            message: '手动处理失败',
+            type: 'warning',
+            duration: 2000
+          })
+        }
+      })
     }
   }
 }

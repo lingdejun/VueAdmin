@@ -252,6 +252,25 @@ export const asyncRoutes = [
         meta: { title: '卡片异常处理', icon: 'form' }
       }
     ]
+  },
+  {
+    path: '/send',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'Send',
+        component: () => import('@/views/send/index'),
+        meta: { title: '报送化工区', icon: 'form' }
+      },
+      {
+        path: 'detail/:id(\\d+)',
+        component: () => import('@/views/send/detail'),
+        name: 'SendInfo',
+        meta: { title: '查看信息', noCache: true, activeMenu: '/send/index' },
+        hidden: true
+      }
+    ]
   }
 ]
 

@@ -29,13 +29,14 @@
         <el-col :span="6"><img :src="lineIcon"><img :src="listIcon" style="margin-left:20px;height:20px"><span style="margin-left:10px;clear: both;vertical-align: super;font-size: 18px;">访客卡列表</span></el-col>
         <el-col :span="18" style="text-align:right;padding-right:10px">
           <el-upload
-            class="filter-item upload-demo"
+            class="upload-demo inline-block"
             :headers="uploadHeaders"
             :action="fileUrl"
             :on-success="fileSuccess"
             :multiple="false"
+            icon="el-icon-upload2"
           >
-            <el-button size="small" type="primary">上传文件</el-button>
+            <el-button type="primary">上传文件</el-button>
           </el-upload>
           <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
             下载模板
@@ -212,13 +213,22 @@ export default {
         id: Id
       }
       obsolete(data).then(response => {
-        this.$notify({
-          title: 'Success',
-          message: '保存成功',
-          type: 'success',
-          duration: 2000
-        })
-        this.getList()
+        if (response.Result === 1) {
+          this.$notify({
+            title: 'Success',
+            message: '作废成功',
+            type: 'success',
+            duration: 2000
+          })
+          this.getList()
+        } else {
+          this.$notify({
+            title: 'Fail',
+            message: '作废失败',
+            type: 'warning',
+            duration: 2000
+          })
+        }
       })
     },
     restCard(Id) {
@@ -226,13 +236,22 @@ export default {
         id: Id
       }
       reset(data).then(response => {
-        this.$notify({
-          title: 'Success',
-          message: '保存成功',
-          type: 'success',
-          duration: 2000
-        })
-        this.getList()
+        if (response.Result === 1) {
+          this.$notify({
+            title: 'Success',
+            message: '重置成功',
+            type: 'success',
+            duration: 2000
+          })
+          this.getList()
+        } else {
+          this.$notify({
+            title: 'Fail',
+            message: '重置失败',
+            type: 'warning',
+            duration: 2000
+          })
+        }
       })
     },
     save() {
@@ -291,5 +310,8 @@ export default {
 .danger{
   background-color:rgba(236, 174, 79, 0.849);
   color:#f3f6fa;
+}
+.inline-block{
+  display: inline-block;
 }
 </style>
