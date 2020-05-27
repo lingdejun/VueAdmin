@@ -91,7 +91,7 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.PageIndex" :limit.sync="listQuery.PageSize" @pagination="getList" />
 
     <el-dialog title="添加卡片" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :model="cardModel" label-position="right" label-width="70px" style="width: 400px; margin-left:50px;">
+      <el-form ref="dataForm" :rules="rules" :model="cardModel" label-position="right" label-width="70px" style="width: 400px; margin-left:50px;">
         <el-form-item label="卡号" prop="Number">
           <el-input v-model="cardModel.Number" />
         </el-form-item>
@@ -158,6 +158,14 @@ export default {
       cardModel: {
         Number: '',
         SN: ''
+      },
+      rules: {
+        Number: [
+          { required: true, message: '请输入卡号', trigger: 'blur' }
+        ],
+        SN: [
+          { required: true, message: '请输入序列号', trigger: 'blur' }
+        ]
       }
     }
   },
@@ -255,14 +263,21 @@ export default {
       })
     },
     save() {
-      add(this.cardModel).then(response => {
-        this.$notify({
-          title: 'Success',
-          message: '保存成功',
-          type: 'success',
-          duration: 2000
-        })
-        this.getList()
+      this.$refs['dataForm'].validate((valid) => {
+        if (valid) {
+          add(this.cardModel).then(response => {
+            this.$notify({
+              title: 'Success',
+              message: '保存成功',
+              type: 'success',
+              duration: 2000
+            })
+            this.dialogFormVisible = false
+            this.getList()
+          })
+        } else {
+          return false
+        }
       })
     },
     formatJson(filterVal) {

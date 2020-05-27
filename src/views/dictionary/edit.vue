@@ -30,7 +30,7 @@
           <span>{{ row.Name }}</span>
         </template>
       </el-table-column>
-      <el-table-column v-if="listQuery.pid==1" label="是否必填" align="center">
+      <el-table-column v-if="listQuery.pid==1" label="是否必填备注" align="center">
         <template slot-scope="{row}">
           <span>{{ row.RemarkRequired }}</span>
         </template>
@@ -59,11 +59,11 @@
     </el-table>
 
     <el-dialog :title="textReasonMap[dialogReasonStatus]" :visible.sync="dialogReasonFormVisible">
-      <el-form ref="dataReasonForm" :model="reasonModel" label-position="right" label-width="70px" style="width: 400px; margin-left:50px;">
+      <el-form ref="dataReasonForm" :rules="reasonRules" :model="reasonModel" label-position="right" label-width="110px" style="width: 400px; margin-left:50px;">
         <el-form-item label="来访理由名称" prop="Name">
           <el-input v-model="reasonModel.Name" />
         </el-form-item>
-        <el-form-item label="是否必填" prop="RemarkRequired">
+        <el-form-item label="是否必填备注" prop="RemarkRequired">
           <el-select v-model="reasonModel.RemarkRequired">
             <el-option label="否" value="0" />
             <el-option label="是" value="1" />
@@ -80,7 +80,7 @@
       </div>
     </el-dialog>
     <el-dialog :title="textAreaMap[dialogAreaStatus]" :visible.sync="dialogAreaFormVisible">
-      <el-form ref="dataAreaForm" :model="areaModel" label-position="right" label-width="70px" style="width: 400px; margin-left:50px;">
+      <el-form ref="dataAreaForm" :rules="areaRules" :model="areaModel" label-position="right" label-width="110px" style="width: 400px; margin-left:50px;">
         <el-form-item label="来访区域名称" prop="Name">
           <el-input v-model="areaModel.Name" />
         </el-form-item>
@@ -102,7 +102,7 @@
       </div>
     </el-dialog>
     <el-dialog :title="textCertificateMap[dialogCertificateStatus]" :visible.sync="dialogCertificateFormVisible">
-      <el-form ref="dataForm" :model="certificateModel" label-position="right" label-width="70px" style="width: 400px; margin-left:50px;">
+      <el-form ref="dataForm" :rules="idRules" :model="certificateModel" label-position="right" label-width="80px" style="width: 400px; margin-left:50px;">
         <el-form-item label="证件类型" prop="Name">
           <el-input v-model="certificateModel.Name" />
         </el-form-item>
@@ -176,7 +176,25 @@ export default {
         Name: ''
       },
       areaTags: [],
-      Tag: ''
+      Tag: '',
+      reasonRules: {
+        Name: [
+          { required: true, message: '请输入来访理由名称', trigger: 'blur' }
+        ],
+        RemarkRequired: [
+          { required: true, message: '是否必填备注', trigger: 'blur' }
+        ]
+      },
+      areaRules: {
+        Name: [
+          { required: true, message: '请输入来访区域名称', trigger: 'blur' }
+        ]
+      },
+      idRules: {
+        Name: [
+          { required: true, message: '请输入证件类型', trigger: 'blur' }
+        ]
+      }
     }
   },
   created() {
@@ -206,12 +224,18 @@ export default {
           Name: '',
           RemarkRequired: '0'
         }
+        this.$nextTick(() => {
+          this.$refs['dataReasonForm'].clearValidate()
+        })
         console.log(111)
       }
       if (this.listQuery.pid === '2') {
         this.dialogAreaFormVisible = 'add'
         this.dialogAreaFormVisible = true
         this.areaModel = {}
+        this.$nextTick(() => {
+          this.$refs['dataAreaForm'].clearValidate()
+        })
         console.log(111)
       }
       if (this.listQuery.pid === '3') {
@@ -222,6 +246,9 @@ export default {
           Pid: this.listQuery.pid,
           Name: ''
         }
+        this.$nextTick(() => {
+          this.$refs['dataForm'].clearValidate()
+        })
         console.log(111)
       }
     },
@@ -231,12 +258,18 @@ export default {
         this.reasonModel.RemarkRequired = row.RemarkRequired === '否' ? '0' : '1'
         this.dialogReasonStatus = 'update'
         this.dialogReasonFormVisible = true
+        this.$nextTick(() => {
+          this.$refs['dataReasonForm'].clearValidate()
+        })
         console.log(111)
       }
       if (this.listQuery.pid === '2') {
         this.getChild(row.Id)
         this.dialogAreaStatus = 'update'
         this.dialogAreaFormVisible = true
+        this.$nextTick(() => {
+          this.$refs['dataAreaForm'].clearValidate()
+        })
         console.log(111)
       }
       if (this.listQuery.pid === '3') {
@@ -244,6 +277,9 @@ export default {
         this.certificateModel.RemarkRequired = row.RemarkRequired === '否' ? '0' : '1'
         this.dialogCertificateStatus = 'update'
         this.dialogCertificateFormVisible = true
+        this.$nextTick(() => {
+          this.$refs['dataForm'].clearValidate()
+        })
         console.log(111)
       }
     },
@@ -263,108 +299,140 @@ export default {
       })
     },
     saveReason() {
-      saveItem(this.reasonModel).then(response => {
-        if (response.Result === 1) {
-          this.$notify({
-            title: 'Success',
-            message: '保存成功',
-            type: 'success',
-            duration: 1000
+      this.$refs['dataReasonForm'].validate((valid) => {
+        if (valid) {
+          saveItem(this.reasonModel).then(response => {
+            if (response.Result === 1) {
+              this.$notify({
+                title: 'Success',
+                message: '保存成功',
+                type: 'success',
+                duration: 1000
+              })
+              this.dialogReasonFormVisible = false
+              this.getList()
+            } else {
+              this.$notify({
+                title: '失败',
+                message: '保存失败',
+                type: 'warning',
+                duration: 1000
+              })
+            }
           })
-          this.dialogReasonFormVisible = false
-          this.getList()
         } else {
-          this.$notify({
-            title: '失败',
-            message: '保存失败',
-            type: 'warning',
-            duration: 1000
-          })
+          return false
         }
       })
     },
     saveArea() {
-      console.log(this.areaTags)
-      this.areaModel.Pid = this.listQuery.pid
-      if (this.areaTags.length > 0) {
-        const children = this.areaTags.map(item => {
-          return {
-            Name: item.text
-          }
-        })
-        this.areaModel.Children = children
+      if (this.areaTags.length <= 0) {
+        this.$message.error('请选择关联项')
+        return false
       }
-      saveItem(this.areaModel).then(response => {
-        if (response.Result === 1) {
-          this.$notify({
-            title: 'Success',
-            message: '保存成功',
-            type: 'success',
-            duration: 1000
+
+      this.$refs['dataAreaForm'].validate((valid) => {
+        if (valid) {
+          this.areaModel.Pid = this.listQuery.pid
+          if (this.areaTags.length > 0) {
+            const children = this.areaTags.map(item => {
+              return {
+                Name: item.text
+              }
+            })
+            this.areaModel.Children = children
+          }
+          saveItem(this.areaModel).then(response => {
+            if (response.Result === 1) {
+              this.$notify({
+                title: 'Success',
+                message: '保存成功',
+                type: 'success',
+                duration: 1000
+              })
+              this.dialogAreaFormVisible = false
+              this.getList()
+            } else {
+              this.$notify({
+                title: '失败',
+                message: '保存失败',
+                type: 'warning',
+                duration: 1000
+              })
+            }
           })
-          this.dialogAreaFormVisible = false
-          this.getList()
         } else {
-          this.$notify({
-            title: '失败',
-            message: '保存失败',
-            type: 'warning',
-            duration: 1000
-          })
+          return false
         }
       })
     },
     updateArea() {
-      const childPid = this.areaModel.Id
-      if (this.areaTags.length > 0) {
-        const children = this.areaTags.map(item => {
-          const id = item.hasOwnProperty('id') ? item.id : '0'
-          return {
-            Id: id,
-            Pid: childPid,
-            Name: item.text
-          }
-        })
-        this.areaModel.Children = children
+      if (this.areaTags.length <= 0) {
+        this.$message.error('请选择关联项')
+        return false
       }
-      saveItem(this.areaModel).then(response => {
-        if (response.Result === 1) {
-          this.$notify({
-            title: 'Success',
-            message: '保存成功',
-            type: 'success',
-            duration: 1000
+      this.$refs['dataAreaForm'].validate((valid) => {
+        if (valid) {
+          const childPid = this.areaModel.Id
+          if (this.areaTags.length > 0) {
+            const children = this.areaTags.map(item => {
+              const id = item.hasOwnProperty('id') ? item.id : '0'
+              return {
+                Id: id,
+                Pid: childPid,
+                Name: item.text
+              }
+            })
+            this.areaModel.Children = children
+          }
+          saveItem(this.areaModel).then(response => {
+            if (response.Result === 1) {
+              this.$notify({
+                title: 'Success',
+                message: '保存成功',
+                type: 'success',
+                duration: 1000
+              })
+              this.dialogAreaFormVisible = false
+              this.getList()
+            } else {
+              this.$notify({
+                title: '失败',
+                message: '保存失败',
+                type: 'warning',
+                duration: 1000
+              })
+            }
           })
-          this.dialogAreaFormVisible = false
-          this.getList()
         } else {
-          this.$notify({
-            title: '失败',
-            message: '保存失败',
-            type: 'warning',
-            duration: 1000
-          })
+          return false
         }
       })
     },
     saveCertificate() {
-      saveItem(this.certificateModel).then(response => {
-        if (response.Result === 1) {
-          this.$notify({
-            title: 'Success',
-            message: '保存成功',
-            type: 'success',
-            duration: 1000
+      this.$refs['dataForm'].validate((valid) => {
+        if (valid) {
+          saveItem(this.certificateModel).then(response => {
+            if (response.Result === 1) {
+              this.$notify({
+                title: 'Success',
+                message: '保存成功',
+                type: 'success',
+                duration: 1000
+              })
+              this.dialogCertificateFormVisible = false
+              this.getList()
+            } else {
+              this.$notify({
+                title: '失败',
+                message: '保存失败',
+                type: 'warning',
+                duration: 1000
+              })
+            }
           })
-          this.dialogCertificateFormVisible = false
-          this.getList()
         } else {
-          this.$notify({
-            title: '失败',
-            message: '保存失败',
-            type: 'warning',
-            duration: 1000
-          })
+          return false
         }
       })
     },

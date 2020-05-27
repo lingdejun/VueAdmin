@@ -84,27 +84,6 @@
             </el-checkbox-group>
           </div>
 
-          <div v-else-if="element.QuestionCategory=='5'" class="new-coltype">
-            <div class="col_tag">
-              <div class="col_name">{{ index+1+"." }} {{ element.QuestionTitle }}</div>
-              <!--<div class="operation"><span @click="editClick(element)">编辑</span><span>删除</span></div>-->
-            </div>
-            <div class="operation"><img src="../../../assets/images/drugedit.png" @click="editClick(element,index)"><img v-if="cktype!=2" src="../../../assets/images/drugdelete.png" @click="deleteClick(element,index)"></div>
-            <el-input style="width: 490px;" type="textarea" readonly />
-          </div>
-
-          <div v-else-if="element.QuestionCategory=='6'" class="new-coltype">
-            <div class="col_tag">
-              <div class="col_name">{{ index+1+"." }} {{ element.QuestionTitle }}</div>
-              <!--<div class="operation"><span @click="editClick(element)">编辑</span><span>删除</span></div>-->
-            </div>
-            <div class="operation">
-              <img src="../../../assets/images/drugedit.png" @click="editClick(element,index)">
-              <img v-if="cktype!=2" src="../../../assets/images/drugdelete.png" @click="deleteClick(element,index)">
-            </div>
-            <el-input style="width: 490px;" readonly />
-          </div>
-
           <div v-if="element.QuestionCategory=='7'" class="new-coltype">
             <div class="col_tag">
               <div class="col_name">{{ index+1+"." }} {{ element.QuestionTitle }}</div>
@@ -121,8 +100,7 @@
           </div>
         </div>
       </draggable>
-      <div>
-        <el-button class="yulan" @click="saveForm('3')">预览</el-button>
+      <div style="text-align:center">
         <el-button type="primary" @click="savePaperSavequestions('2')">保存</el-button>
       </div>
     </div>
@@ -138,7 +116,7 @@
             </el-form-item>
           </el-row>
 
-          <el-table v-if="formEditControl.QuestionCategory!='5'&&formEditControl.QuestionCategory!='6'" :data="formEditControl.OptionList" style="width: 100%">
+          <el-table :data="formEditControl.OptionList" style="width: 100%">
             <el-table-column prop="" label="选项文字" width="250">
               <template slot-scope="scope">
                 <div v-if="cktype==2" class="table_input">
@@ -187,7 +165,7 @@
             </el-table-column>
           </el-table>
           <div class="flex-row" style="justify-content:space-between;">
-            <div v-if="formEditControl.QuestionCategory!='5'&&formEditControl.QuestionCategory!='6'&&formEditControl.QuestionCategory!='7'" class="col_add_delete">
+            <div v-if="formEditControl.QuestionCategory!='7'" class="col_add_delete">
               <el-button type="primary" class="xiayibu" style="margin: 10px !important;" :disabled="cktype==2" @click="addOptions">新增选项</el-button>
               <!--<el-button type="primary" v-if="formEditControl.OptionList.length>'2'" @click="deleteOptions" class="xiayibu">删除选项</el-button>-->
               <!--<span v-if="formEditControl.options.length>'2'" @click="deleteOptions">删除选项</span>-->
@@ -366,20 +344,6 @@ export default {
       },
       {
         QuestionId: 0,
-        QuestionIndex: 4,
-        QuestionTitle: '开放性问题',
-        QuestionCategory: 5, // 控件类型
-        OptionList: []
-      },
-      {
-        QuestionId: 0,
-        QuestionIndex: 5,
-        QuestionTitle: '打分题',
-        QuestionCategory: 6, // 控件类型
-        OptionList: []
-      },
-      {
-        QuestionId: 0,
         QuestionIndex: 6,
         QuestionTitle: '是非题',
         QuestionCategory: 7, // 控件类型
@@ -522,8 +486,53 @@ export default {
     },
     dialogSave(formName) {
       var str = JSON.stringify(this.formEditControl)
-      this.list2[this.dialogIndex] = JSON.parse(str)
-      this.dialogFormVisible = false
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          this.list2[this.dialogIndex] = JSON.parse(str)
+          if (this.list2[this.dialogIndex].OptionList.length < 2) {
+            this.$message.error('选项个数必须大于或等于2项')
+            return false
+          }
+          const oneAnswer = [1, 3, 7]
+          const picturAnswer = [3, 4]
+          let corrects = 0
+          this.list2[this.dialogIndex].OptionList.forEach(item => {
+            if (item.OptionIsCorrect) {
+              corrects++
+            }
+          })
+          const flagIndex = oneAnswer.findIndex(x => x === this.list2[this.dialogIndex].QuestionCategory)
+          if (flagIndex > -1) {
+            if (corrects !== 1) {
+              this.$message.error('只能有一个正确选项')
+              return false
+            }
+            console.log(1)
+          } else {
+            if (corrects < 2) {
+              this.$message.error('最少两个正确选项')
+              return false
+            }
+          }
+          const pictureIndex = picturAnswer.findIndex(x => x === this.list2[this.dialogIndex].QuestionCategory)
+          if (pictureIndex > -1) {
+            let errorPicture = false
+            this.list2[this.dialogIndex].OptionList.forEach(item => {
+              if (item.OptionImg === '') {
+                errorPicture = true
+              }
+            })
+            if (errorPicture) {
+              this.$message.error('每个选项都必须上传图片')
+              return false
+            }
+          }
+
+          this.dialogFormVisible = false
+        } else {
+          return false
+        }
+      })
     },
     fileSuccess(response, file, fileList) {
       if (response.Result === 1) {

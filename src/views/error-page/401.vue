@@ -9,7 +9,6 @@
           Oops!
         </h1>
         <h2>你没有权限去该页面</h2>
-        
       </el-col>
       <el-col :span="12">
         <img :src="errGif" width="313" height="428" alt="Girl has dropped her ice cream.">

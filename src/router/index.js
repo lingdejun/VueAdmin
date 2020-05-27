@@ -50,16 +50,26 @@ export const constantRoutes = [
     component: () => import('@/views/login/auth-redirect'),
     hidden: true
   },
-  // {
-  //   path: '/404',
-  //   component: () => import('@/views/error-page/404'),
-  //   hidden: true
-  // },
-  // {
-  //   path: '/401',
-  //   component: () => import('@/views/error-page/401'),
-  //   hidden: true
-  // },
+  {
+    path: '/404',
+    component: () => import('@/views/error-page/404'),
+    hidden: true
+  },
+  {
+    path: '/401',
+    component: () => import('@/views/error-page/401'),
+    hidden: true
+  },
+  {
+    path: '/qrcode',
+    component: () => import('@/views/wx/qrcode'),
+    hidden: true
+  },
+  {
+    path: '/wxcallback',
+    component: () => import('@/views/wx/wxcallback'),
+    hidden: true
+  },
   {
     path: '/',
     component: Layout,

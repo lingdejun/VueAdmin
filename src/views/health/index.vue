@@ -15,7 +15,7 @@
             v-model="state"
             active-color="#13ce66"
             inactive-color="#ff4949"
-            :change="changeState"
+            @change="changeState"
           />
         </el-col>
       </el-row>
@@ -50,7 +50,7 @@ export default {
       }
       this.listLoading = true
       get(data).then(response => {
-        this.state = response.Value === '1'
+        this.state = response.Data.Value === '1'
 
         // Just to simulate the time of the request
         setTimeout(() => {
@@ -59,10 +59,12 @@ export default {
       })
     },
     changeState() {
+      console.log(this.state)
       const data = {
         Id: 1,
         Value: this.state ? '1' : '0'
       }
+      console.log(data)
       update(data).then(response => {
         if (response.Result !== 1) {
           this.$notify({

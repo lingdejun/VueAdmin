@@ -22,7 +22,7 @@
         </el-row>
         <el-row>
           <el-form-item label="证件类型">
-            <el-select v-model="listQuery.IDType" clearable class="filter-item" style="width: 130px">
+            <el-select v-model="listQuery.ID_Type" clearable class="filter-item" style="width: 130px">
               <el-option v-for="item in idTypeOptions" :key="item.Value" :label="item.Key" :value="item.Value" />
             </el-select>
           </el-form-item>
@@ -39,7 +39,7 @@
     </div>
     <div style="padding-bottom: 10px;padding-top: 10px;background-color:#FFFFFF;border:1px solid #dfe6ec;border-top-right-radius: 10px;border-top-left-radius: 10px;">
       <el-row>
-        <el-col :span="6"><img :src="lineIcon"><img :src="listIcon" style="margin-left:20px;height:20px"><span style="margin-left:10px;clear: both;vertical-align: super;font-size: 18px;">结果列表</span></el-col>
+        <el-col :span="6"><img :src="lineIcon"><img :src="listIcon" style="margin-left:20px;height:20px"><span style="margin-left:10px;clear: both;vertical-align: super;font-size: 18px;">黑名单列表</span></el-col>
         <el-col :span="18" style="text-align:right;padding-right:10px">
           <el-button v-waves class="filter-item" @click="addBlackItem">
             添加黑名单
@@ -89,7 +89,7 @@
       </el-table-column>
       <el-table-column label="性别" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.Gender }}</span>
+          <span>{{ row.GenderText }}</span>
         </template>
       </el-table-column>
       <el-table-column label="联系电话" align="center">
@@ -129,7 +129,7 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.PageIndex" :limit.sync="listQuery.PageSize" @pagination="getList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :model="blackModel" label-position="right" label-width="70px" style="width: 400px; margin-left:50px;">
+      <el-form ref="dataForm" :rules="rules" :model="blackModel" label-position="right" label-width="80px" style="width: 400px; margin-left:50px;">
         <el-form-item label="访客单位" prop="Company">
           <el-input v-model="blackModel.Company" />
         </el-form-item>
@@ -137,8 +137,8 @@
           <el-input v-model="blackModel.Name" />
         </el-form-item>
         <el-form-item label="性别" prop="Gender">
-          <el-radio v-model="blackModel.Gender" label="1">男</el-radio>
-          <el-radio v-model="blackModel.Gender" label="0">女</el-radio>
+          <el-radio v-model="blackModel.Gender" :label="1">男</el-radio>
+          <el-radio v-model="blackModel.Gender" :label="0">女</el-radio>
         </el-form-item>
         <el-form-item label="联系电话" prop="Mobile">
           <el-input v-model="blackModel.Mobile" />
@@ -146,7 +146,7 @@
         <el-form-item label="国籍" prop="Nation">
           <el-input v-model="blackModel.Nation" />
         </el-form-item>
-        <el-form-item label="证件类型">
+        <el-form-item label="证件类型" prop="ID_Type">
           <el-select v-model="blackModel.ID_Type" clearable class="filter-item" style="width: 130px">
             <el-option v-for="item in idTypeOptions" :key="item.Value" :label="item.Key" :value="item.Value" />
           </el-select>
@@ -177,7 +177,7 @@
           <span>{{ blackModel.Name }}</span>
         </el-form-item>
         <el-form-item label="性别" prop="Gender">
-          <span>{{ blackModel.Gender }}</span>
+          <span>{{ blackModel.GenderText }}</span>
         </el-form-item>
         <el-form-item label="联系电话" prop="Mobile">
           <span>{{ blackModel.Mobile }}</span>
@@ -234,7 +234,7 @@ export default {
         Name: '',
         Mobile: '',
         Nation: '',
-        IDType: '',
+        ID_Type: '',
         IDNumber: ''
       },
       downloadLoading: false,
@@ -257,7 +257,30 @@ export default {
         ID_Number: '',
         Remark: ''
       },
-      idTypeOptions: []
+      idTypeOptions: [],
+      rules: {
+        Company: [
+          { required: true, message: '访客单位', trigger: 'blur' }
+        ],
+        Name: [
+          { required: true, message: '请输入姓名', trigger: 'blur' }
+        ],
+        Gender: [
+          { required: true, message: '请选择性别', trigger: 'blur' }
+        ],
+        Mobile: [
+          { required: true, message: '请输入联系电话', trigger: 'blur' }
+        ],
+        Nation: [
+          { required: true, message: '请输入国籍', trigger: 'blur' }
+        ],
+        ID_Type: [
+          { required: true, message: '请选择证件类型', trigger: 'blur' }
+        ],
+        ID_Number: [
+          { required: true, message: '请输入证件号', trigger: 'blur' }
+        ]
+      }
     }
   },
   created() {
@@ -317,7 +340,7 @@ export default {
     },
     editBlackItem(row) {
       this.blackModel = Object.assign({}, row) // copy obj
-      this.blackModel.Gender = this.blackModel.Gender === '男' ? '1' : '0'
+      this.blackModel.ID_Type = this.blackModel.ID_Type + ''
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {

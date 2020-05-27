@@ -39,3 +39,11 @@ export function manualProcessing(data) {
     data
   })
 }
+
+export function getCalendar(data) {
+  return request({
+    url: '/stat/getcalendar',
+    method: 'post',
+    data
+  })
+}

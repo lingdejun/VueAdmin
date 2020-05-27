@@ -55,7 +55,7 @@
     </div>
     <div style="padding-bottom: 10px;padding-top: 10px;background-color:#FFFFFF;border:1px solid #dfe6ec;border-top-right-radius: 10px;border-top-left-radius: 10px;">
       <el-row>
-        <el-col :span="6"><img :src="lineIcon"><img :src="listIcon" style="margin-left:20px;height:20px"><span style="margin-left:10px;clear: both;vertical-align: super;font-size: 18px;">结果列表</span></el-col>
+        <el-col :span="6"><img :src="lineIcon"><img :src="listIcon" style="margin-left:20px;height:20px"><span style="margin-left:10px;clear: both;vertical-align: super;font-size: 18px;">员工列表</span></el-col>
         <el-col :span="18" style="text-align:right;padding-right:10px">
           <el-button v-waves class="filter-item" @click="addEmployee">
             添加
@@ -130,7 +130,7 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.PageIndex" :limit.sync="listQuery.PageSize" @pagination="getList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :model="employeeModel" label-position="right" label-width="70px" style="width: 400px; margin-left:50px;">
+      <el-form ref="dataForm" :rules="rules" :model="employeeModel" label-position="right" label-width="90px" style="width: 400px; margin-left:50px;">
         <el-form-item label="员工编号" prop="Number">
           <el-input v-model="employeeModel.Number" />
         </el-form-item>
@@ -141,12 +141,19 @@
           <el-input v-model="employeeModel.Email" />
         </el-form-item>
         <el-form-item label="员工类型" prop="Category">
-          <el-radio v-model="employeeModel.Category" label="1">赛科员工</el-radio>
-          <el-radio v-model="employeeModel.Category" label="2">前台安保</el-radio>
+          <el-radio-group v-model="employeeModel.Category" @change="dialogCategoryChange">
+            <el-radio-button label="1">赛科员工</el-radio-button>
+            <el-radio-button label="2">前台安保</el-radio-button>
+          </el-radio-group>
         </el-form-item>
-        <el-form-item label="可否使用vip通道" prop="Vip" label-width="auto">
+        <el-form-item v-if="employeeModel.Category=='1'" label="可否使用vip通道" prop="Vip" label-width="auto">
           <el-radio v-model="employeeModel.Vip" label="1">启用</el-radio>
           <el-radio v-model="employeeModel.Vip" label="0">关闭</el-radio>
+        </el-form-item>
+        <el-form-item v-if="employeeModel.Category=='2'" label="门岗" prop="Gate" label-width="auto">
+          <el-select v-model="employeeModel.Gate" multiple clearable class="filter-item">
+            <el-option v-for="item in gateOptions" :key="item.Value" :label="item.Key" :value="item.Value" />
+          </el-select>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer" style="text-align:center">
@@ -202,14 +209,30 @@ export default {
         add: '添加员工'
       },
       employeeModel: {
-        Id: '',
-        Category: 1,
+        Id: '0',
+        Category: '1',
         Name: '',
         Number: '',
         Email: '',
-        Vip: ''
+        Vip: '',
+        Gate: []
       },
-      gateOptions: []
+      gateOptions: [],
+      rules: {
+        Number: [
+          { required: true, message: '请输入编号', trigger: 'blur' }
+        ],
+        Name: [
+          { required: true, message: '请输入姓名', trigger: 'blur' }
+        ],
+        Email: [
+          { required: true, message: '请输入Email', trigger: 'blur' },
+          { type: 'email', message: 'Email格式错误', trigger: 'blur' }
+        ],
+        Category: [
+          { required: true, message: '请选择类型', trigger: 'blur' }
+        ]
+      }
     }
   },
   created() {
@@ -248,18 +271,22 @@ export default {
       this.listQuery.Gate = ''
       this.getList()
     },
+    dialogCategoryChange() {
+      console.log()
+    },
     handleFilter() {
       this.listQuery.PageIndex = 1
       this.getList()
     },
     resetTemp() {
       this.employeeModel = {
-        Id: '',
+        Id: '0',
         Category: '1',
         Name: '',
         Number: '',
         Email: '',
-        Vip: '0'
+        Vip: '0',
+        Gate: []
       }
     },
     addEmployee() {
@@ -297,6 +324,18 @@ export default {
     save() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
+          console.log(this.employeeModel)
+          if (this.employeeModel.Category === '1') {
+            if (this.employeeModel.Vip === '') {
+              this.$message.error('请选择可否使用vip通道')
+              return false
+            }
+          } else {
+            if (this.employeeModel.Gate === null || this.employeeModel.Gate.length <= 0) {
+              this.$message.error('请选择门岗')
+              return false
+            }
+          }
           createEmployee(this.employeeModel).then(() => {
             this.list.unshift(this.employeeModel)
             this.dialogFormVisible = false
@@ -322,7 +361,7 @@ export default {
             this.dialogFormVisible = false
             this.$notify({
               title: 'Success',
-              message: 'Update Successfully',
+              message: '更新成功',
               type: 'success',
               duration: 2000
             })

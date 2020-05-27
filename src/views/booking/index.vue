@@ -70,7 +70,7 @@
     </div>
     <div style="padding-bottom: 10px;padding-top: 10px;background-color:#FFFFFF;border:1px solid #dfe6ec;border-top-right-radius: 10px;border-top-left-radius: 10px;">
       <el-row>
-        <el-col :span="6"><img :src="lineIcon"><img :src="listIcon" style="margin-left:20px;height:20px"><span style="margin-left:10px;clear: both;vertical-align: super;font-size: 18px;">结果列表</span></el-col>
+        <el-col :span="6"><img :src="lineIcon"><img :src="listIcon" style="margin-left:20px;height:20px"><span style="margin-left:10px;clear: both;vertical-align: super;font-size: 18px;">预约列表</span></el-col>
         <el-col :span="18" style="text-align:right;padding-right:10px">
           <el-button v-waves class="filter-item" @click="handleFilter('1')">
             一周
@@ -184,13 +184,13 @@ export default {
   filters: {
     statusFilter(status) {
       const statusMap = {
-        申请中: 'success',
-        报备中: 'info',
-        已登记: 'info',
-        已拒绝: 'danger',
-        已生效: 'info',
-        已删除: 'danger',
-        已完成: 'danger'
+        申请中: 'sqz',
+        报备中: 'bbz',
+        已登记: 'ydj',
+        已拒绝: 'yjj',
+        已生效: 'ysx',
+        已删除: 'ysc',
+        已完成: 'ywc'
       }
       return statusMap[status]
     }
@@ -288,18 +288,33 @@ export default {
 </script>
 
 <style scoped>
-.success{
-  background-color: yellowgreen;
+.sqz{
+  background-color: #22589a;
+  color:#f3f6fa;
+}
+.bbz{
+  background-color:#644cbd;
+  color:#f3f6fa;
+}
+.ydj{
+  background-color:#c58202;
+  color:#f3f6fa;
+}
+.yjj{
+  background-color:#ed6544;
+  color:#f3f6fa;
+}
+.ysx{
+  background-color:#3d87ee;
+  color:#f3f6fa;
+}
+.ysc{
+  background-color:#9b9b9b;
+  color:#f3f6fa;
+}
+.ywc{
+  background-color:#46c23b;
   color:#f3f6fa;
 }
 
-.info{
-  background-color:cornflowerblue;
-  color:#f3f6fa;
-}
-
-.danger{
-  background-color:rgba(236, 174, 79, 0.849);
-  color:#f3f6fa;
-}
 </style>

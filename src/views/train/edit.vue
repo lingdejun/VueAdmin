@@ -6,12 +6,12 @@
           培训类型
         </el-col>
       </el-row>
-      <el-row>
-        <el-col>
-          <el-input v-model="title" placeholder="标题" />
-        </el-col>
-      </el-row>
-      <el-row style="padding:20px" type="flex" justify="center">
+      <el-form style="margin-top:20px" label-width="80px">
+        <el-form-item label="标题">
+          <el-input v-model="title" style="width:500px" />
+        </el-form-item>
+      </el-form>
+      <el-row style="padding:20px" type="flex" justify="start">
         <el-col :span="6">
           <el-radio v-model="trainCategory" :label="1">访客培训</el-radio>
         </el-col>
@@ -35,7 +35,7 @@
           <el-upload
             class="upload-demo"
             drag
-            :headers="uploadHeaders"
+            :headers="headers"
             :action="fileUrl"
             :multiple="false"
             :on-success="uploadSuccess"
@@ -67,7 +67,7 @@ export default {
   },
   data() {
     return {
-      ploadHeaders: {
+      headers: {
         'LoginId': '123'
       },
       title: '',

@@ -1,5 +1,5 @@
 <template>
-  <component :is="type" v-bind="linkProps(to)">
+  <component :is="type" v-bind="linkProps(to)" @click.native="click(to)">
     <slot />
   </component>
 </template>
@@ -37,6 +37,13 @@ export default {
       return {
         to: to
       }
+    },
+    click(to) {
+      const date = new Date()
+      const path = to + '/?key=' + date.getMilliseconds()
+      // console.log('click')
+      // console.log(path)
+      this.$router.push(path)
     }
   }
 }

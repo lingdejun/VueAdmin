@@ -2,7 +2,7 @@
   <div class="app-container">
     <div style="padding-bottom: 10px;padding-top: 10px;background-color:#FFFFFF;border:1px solid #dfe6ec;border-top-right-radius: 10px;border-top-left-radius: 10px;">
       <el-row>
-        <el-col :span="6"><img :src="lineIcon"><img :src="listIcon" style="margin-left:20px;height:20px"><span style="margin-left:10px;clear: both;vertical-align: super;font-size: 18px;">结果列表</span></el-col>
+        <el-col :span="6"><img :src="lineIcon"><img :src="listIcon" style="margin-left:20px;height:20px"><span style="margin-left:10px;clear: both;vertical-align: super;font-size: 18px;">角色列表</span></el-col>
         <el-col :span="18" style="text-align:right;padding-right:10px">
           <el-button v-waves class="filter-item" @click="addRole">
             添加
@@ -57,12 +57,12 @@
     </el-table>
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :model="roleModel" label-position="right" label-width="70px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="角色名称" prop="Number">
-          <el-input v-model="roleModel.Number" />
-        </el-form-item>
-        <el-form-item label="角色编号" prop="Name">
+      <el-form ref="dataForm" :rules="rules" :model="roleModel" label-position="right" label-width="80px" style="width: 400px; margin-left:50px;">
+        <el-form-item label="角色名称" prop="Name">
           <el-input v-model="roleModel.Name" />
+        </el-form-item>
+        <el-form-item label="角色编号" prop="Number">
+          <el-input v-model="roleModel.Number" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer" style="text-align:center">
@@ -130,7 +130,7 @@
         />
         <el-table-column
           prop="Number"
-          label="员工姓名"
+          label="员工编号"
         />
       </el-table>
       <pagination v-show="employeeTotal>0" :total="employeeTotal" :page.sync="employeeSearchModel.PageIndex" :limit.sync="employeeSearchModel.PageSize" @pagination="getEmp" />
@@ -198,7 +198,15 @@ export default {
         children: 'Children',
         label: 'Name'
       },
-      permissionCheckedIds: []
+      permissionCheckedIds: [],
+      rules: {
+        Number: [
+          { required: true, message: '请输入角色编号', trigger: 'blur' }
+        ],
+        Name: [
+          { required: true, message: '请输入角色名称', trigger: 'blur' }
+        ]
+      }
     }
   },
   created() {
@@ -290,7 +298,10 @@ export default {
       })
     },
     deleteRole(row, index) {
-      delRole(this.roleModel).then(() => {
+      const data = {
+        id: row.Id
+      }
+      delRole(data).then(() => {
         this.list.splice(index, 1)
         this.$notify({
           title: 'Success',
